@@ -45,7 +45,7 @@ InfoHunter es una herramienta desarrollada en Python que utiliza técnicas de OS
 
 ## 📖 Uso
 
-1. Ejecuta el archivo main.py dentro de src:
+1. Ejecuta el archivo main.py:
 
    ```bash
    python main.py
