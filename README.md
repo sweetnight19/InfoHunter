@@ -68,7 +68,9 @@ A continuación se muestra el plan de desarrollo para el proyecto:
 
 - David Marquet
 - Email: david-marquet@hotmail.com
-- GitHub: [sweetnight19](https://github.com/sweetnight19)
+- GitHub: [@sweetnight19](https://github.com/sweetnight19)
+- Twitter: [@DavidMarquet19](https://twitter.com/DavidMarquet19)
+- Linkedin: [David Marquet](https://www.linkedin.com/in/davidmarquetvall/)
 
 ## 🤝 Contribuciones
 
