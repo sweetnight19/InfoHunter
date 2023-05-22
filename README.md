@@ -1,5 +1,5 @@
 <div align="center">
-   <img src="../images/logo1.png" alt="Logo de InfoHunter">
+   <img src="images/logo1.png" alt="Logo de InfoHunter">
 </div>
 
 &nbsp;
