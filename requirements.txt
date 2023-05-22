@@ -1,0 +1,4 @@
+markdown-it-py==2.2.0
+mdurl==0.1.2
+pyfiglet==0.8.post1
+Pygments==2.15.1
