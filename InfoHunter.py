@@ -1,4 +1,5 @@
 import pyfiglet
+import argparse
 from src.recopilacion.consultas import realizar_consulta
 from src.recopilacion.extraccion import procesar_resultados
 from src.recopilacion.fuentes import obtener_informacion_redes_sociales
@@ -11,9 +12,9 @@ def print_banner():
     print("Bienvenido a InfoHunter - Herramienta de OSINT")
 
 
-def recopilar_informacion():
+def recopilar_informacion(nombre: str):
     # Solicitar al usuario el nombre para buscar información
-    nombre = input("Ingresa el nombre para buscar información: ")
+    # nombre = input("Ingresa el nombre para buscar información: ")
 
     # Realizar una consulta
     realizar_consulta(nombre)
@@ -26,10 +27,23 @@ def recopilar_informacion():
 
 
 def main():
+    # Crear el parser de argumentos
+    parser = argparse.ArgumentParser(description="Herramienta de OSINT")
+
+    # Agregar el argumento '-u' para el nombre de usuario
+    parser.add_argument("-u", "--username", type=str, help="Nombre de usuario")
+
+    # Obtener los argumentos pasados desde la línea de comandos
+    args = parser.parse_args()
+
+    # Acceder al valor del argumento '-u' (username)
+    username = args.username
+
+    # Mostrar el banner
     print_banner()
 
     # 1. Realizar la recopilación de información
-    recopilar_informacion()
+    recopilar_informacion(username)
 
     # 2. Analizar la información obtenida
     # analizar_informacion()
