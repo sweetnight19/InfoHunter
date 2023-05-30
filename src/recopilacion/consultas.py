@@ -1,2 +1,5 @@
+from . import fuentes
+
 def realizar_consulta(nombre: str):
-    pass
+    fuentes.obtener_informacion_redes_sociales(nombre)
+    

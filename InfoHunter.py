@@ -1,7 +1,7 @@
 import pyfiglet
 from src.recopilacion.consultas import realizar_consulta
-from recopilacion.extraccion import procesar_resultados
-from recopilacion.fuentes import obtener_informacion_redes_sociales
+from src.recopilacion.extraccion import procesar_resultados
+from src.recopilacion.fuentes import obtener_informacion_redes_sociales
 
 
 def print_banner():
@@ -11,14 +11,18 @@ def print_banner():
     print("Bienvenido a InfoHunter - Herramienta de OSINT")
 
 def recopilar_informacion():
+
+    # Solicitar al usuario el nombre para buscar información
+    nombre = input("Ingresa el nombre para buscar información: ")
+
     # Realizar una consulta
-    resultados = realizar_consulta('nombre de la persona o empresa')
+    realizar_consulta(nombre)
     
     # Procesar los resultados
-    datos_procesados = procesar_resultados(resultados)
+    #datos_procesados = procesar_resultados(resultados)
     
     # Obtener información adicional de redes sociales
-    informacion_social = obtener_informacion_redes_sociales('nombre de usuario')
+    #informacion_social = obtener_informacion_redes_sociales('nombre de usuario')
     
  
 def main():
