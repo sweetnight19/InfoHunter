@@ -1,8 +1,34 @@
 import pyfiglet
 import argparse
-from src.recopilacion.consultas import realizar_consulta
+import json
+from src.recopilacion import consultas
 from src.recopilacion.extraccion import procesar_resultados
 from src.recopilacion.fuentes import obtener_informacion_redes_sociales
+
+
+class ApiKeysManager:
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.api_keys = {}
+
+    def load_keys(self):
+        try:
+            with open(self.file_path) as file:
+                self.api_keys = json.load(file)
+        except FileNotFoundError:
+            print(
+                f"El archivo {self.file_path} no existe. Asegúrate de crearlo y agregar las claves de API."
+            )
+
+    def get_key(self, api_name):
+        return self.api_keys.get(api_name)
+
+    def add_key(self, api_name, api_key):
+        self.api_keys[api_name] = api_key
+
+    def save_keys(self):
+        with open(self.file_path, "w") as file:
+            json.dump(self.api_keys, file, indent=4)
 
 
 def print_banner():
@@ -12,12 +38,19 @@ def print_banner():
     print("Bienvenido a InfoHunter - Herramienta de OSINT")
 
 
-def recopilar_informacion(nombre: str):
-    # Solicitar al usuario el nombre para buscar información
-    # nombre = input("Ingresa el nombre para buscar información: ")
-
+def recopilar_informacion_mail(mail: str, pyhunter_api_key: str):
     # Realizar una consulta
-    realizar_consulta(nombre)
+    consultas.realizar_consulta_email(mail, pyhunter_api_key)
+
+
+def recopilar_informacion_dominio(domain: str, pyhunter_api_key: str):
+    # Realizar una consulta
+    consultas.realizar_consulta_dominio(domain, pyhunter_api_key)
+
+
+def recopilar_informacion_redes_sociales(username: str):
+    # Realizar una consulta
+    consultas.realizar_consulta_redes_sociales(nombre)
 
     # Procesar los resultados
     # datos_procesados = procesar_resultados(resultados)
@@ -30,20 +63,46 @@ def main():
     # Crear el parser de argumentos
     parser = argparse.ArgumentParser(description="Herramienta de OSINT")
 
-    # Agregar el argumento '-u' para el nombre de usuario
     parser.add_argument("-u", "--username", type=str, help="Nombre de usuario")
+    parser.add_argument("-m", "--email", type=str, help="Email a buscar")
+    parser.add_argument("-d", "--domain", type=str, help="Dominio a buscar")
 
     # Obtener los argumentos pasados desde la línea de comandos
     args = parser.parse_args()
 
-    # Acceder al valor del argumento '-u' (username)
+    # Acceder a los valores de los argumentos
     username = args.username
+    mail = args.email
+    domain = args.domain
+
+    # Uso de la clase ApiKeysManager
+    keys_manager = ApiKeysManager("api_keys.json")
+    keys_manager.load_keys()
 
     # Mostrar el banner
     print_banner()
 
     # 1. Realizar la recopilación de información
-    recopilar_informacion(username)
+    if username:
+        recopilar_informacion_redes_sociales(username)
+    if mail:
+        pyhunter_api_key = keys_manager.get_key("pyhunter")
+        if pyhunter_api_key:  # Utilizar la clave de API
+            print(f"Clave de PyHunter: {pyhunter_api_key}")
+            recopilar_informacion_mail(mail, pyhunter_api_key)
+        else:
+            print(
+                "La clave de PyHunter no se encuentra en el archivo de claves de API."
+            )
+    if domain:
+        pyhunter_api_key = keys_manager.get_key("pyhunter")
+        if pyhunter_api_key:  # Utilizar la clave de API
+            print(f"Clave de PyHunter: {pyhunter_api_key}")
+            recopilar_informacion_dominio(domain, pyhunter_api_key)
+        else:
+            print(
+                "La clave de PyHunter no se encuentra en el archivo de claves de API."
+            )
 
     # 2. Analizar la información obtenida
     # analizar_informacion()
