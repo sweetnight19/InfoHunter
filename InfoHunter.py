@@ -50,7 +50,7 @@ def recopilar_informacion_dominio(domain: str, pyhunter_api_key: str):
 
 def recopilar_informacion_redes_sociales(username: str):
     # Realizar una consulta
-    consultas.realizar_consulta_redes_sociales(nombre)
+    consultas.realizar_consulta_redes_sociales(username)
 
     # Procesar los resultados
     # datos_procesados = procesar_resultados(resultados)
@@ -97,7 +97,6 @@ def main():
     if domain:
         pyhunter_api_key = keys_manager.get_key("pyhunter")
         if pyhunter_api_key:  # Utilizar la clave de API
-            print(f"Clave de PyHunter: {pyhunter_api_key}")
             recopilar_informacion_dominio(domain, pyhunter_api_key)
         else:
             print(

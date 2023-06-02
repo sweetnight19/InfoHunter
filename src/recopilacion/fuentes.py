@@ -7,10 +7,35 @@ def obtener_informacion_redes_sociales(nombre: str):
     # Verificar el sistema operativo
     if sys.platform.startswith("linux") or sys.platform.startswith("darwin"):
         # Llamada al sistema en Linux
-        comando = "python3 src/sherlock/sherlock/sherlock.py -fo output " + nombre
+        comando = "python src/sherlock/sherlock/sherlock.py -fo output " + nombre
     else:
         # Llamada al sistema en otros sistemas operativos
         comando = "python src\sherlock\sherlock\sherlock.py -fo output " + nombre
+
+    # Ejecutar el comando y capturar la salida
+    os.system(comando)
+
+
+def obtener_informacion_theHarvester(domain: str):
+    # Verificar el sistema operativo
+    if sys.platform.startswith("linux") or sys.platform.startswith("darwin"):
+        # Llamada al sistema en Linux
+        comando = (
+            "python src/theHarvester/theHarvester.py -d "
+            + domain
+            + " -b all -n -c -f output/"
+            + domain
+            + ".json"
+        )
+    else:
+        # Llamada al sistema en otros sistemas operativos
+        comando = (
+            "python src\theHarvester\theHarvester.py -d "
+            + domain
+            + " -b all -n -c -f output'"
+            + domain
+            + ".json"
+        )
 
     # Ejecutar el comando y capturar la salida
     os.system(comando)
@@ -36,56 +61,46 @@ def obtener_informacion_dominio(domain: str, apikey: str):
     hunter = PyHunter(apikey)
     result = hunter.domain_search(domain)
 
-    # print("test: " + str(result) + "----------\n")
-
-    if result["domain"] != "None":
-        print("Dominio: " + str(result["domain"]))
-        print("Nombre de la organización: " + str(result["organization"]))
-        print("Descripcion: " + str(result["description"]))
-        if not result["twitter"] == "None":
-            print("Twitter: " + str(result["twitter"]))
-        if not result["facebook"] == "None":
-            print("facebook: " + str(result["facebook"]))
-        if not result["linkedin"] == "None":
-            print("linkedin: " + str(result["linkedin"]))
-        if not result["instagram"] == "None":
-            print("instagram: " + str(result["instagram"]))
-        if not result["youtube"] == "None":
-            print("youtube: " + str(result["youtube"]))
+    if result["domain"] != None:
+        comprobar_none(result["domain"], "Dominio")
+        comprobar_none(result["organization"], "Nombre de la organización: ")
+        comprobar_none(result["organization"], "Descripcion: ")
+        comprobar_none(result["twitter"], "Twitter: ")
+        comprobar_none(result["facebook"], "Facebook: ")
+        comprobar_none(result["linkedin"], "LinkedIn: ")
+        comprobar_none(result["instagram"], "Instagram: ")
+        comprobar_none(result["youtube"], "Youtube: ")
+        comprobar_none(result["facebook"], "Facebook: ")
 
         aux = result["technologies"]
         print("Tecnologias empleadas:")
         for a in aux:
             print("\t- " + str(a))
 
-        print("Pais: " + str(result["country"]))
-        print("Estado: " + str(result["state"]))
-        print("Ciudad: " + str(result["city"]))
+        comprobar_none(result["country"], "Pais: ")
+        comprobar_none(result["state"], "Estado: ")
+        comprobar_none(result["city"], "Ciudad: ")
 
         aux = result["emails"]
         print("Emails encontrados:")
         for email in aux:
-            print("\t- Email: " + str(email["value"]))
-            print(
-                "\t- Nombre: "
-                + str(email["first_name"])
-                + " "
-                + str(email["last_name"])
-            )
-            if not email["position"] == "None":
-                print("\t\t- Posicion: " + str(email["position"]))
-            if not email["seniority"] == "None":
-                print("\t\t- Senior: " + str(email["seniority"]))
-            if not email["department"] == "None":
-                print("\t\t- Departamento: " + str(email["department"]))
-            if not email["linkedin"] == "None":
-                print("\t\t- LinkedIn: " + str(email["linkedin"]))
-            if not email["phone_number"] == "None":
-                print("\t\t- Telefono: " + str(email["phone_number"]))
+            comprobar_none(email["value"], "\t- Email: ")
+            if email["first_name"] != None and email["last_name"] != None:
+                comprobar_none(
+                    email["first_name"] + " " + email["last_name"], "\t- Nombre: "
+                )
+            comprobar_none(email["position"], "\t\t- Posicion: ")
+            comprobar_none(email["seniority"], "\t\t- Senior: ")
+            comprobar_none(email["department"], "\t\t- Departamento: ")
+            comprobar_none(email["linkedin"], "\t\t- LinkedIn: ")
+            comprobar_none(email["phone_number"], "\t\t- Telefono: ")
             print("\n")
     else:
         print(
             "La dirección de correo electrónico no es válida o no se encontró información asociada."
         )
 
-    # print(result)
+
+def comprobar_none(text: str, mensaje: str):
+    if text != None:
+        print(str(mensaje) + " " + str(text))

@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  theharvester.svc.local:
+    container_name: theHarvester
+    volumes:
+      - ./api-keys.yaml:/app/api-keys.yaml
+      - ./api-keys.yaml:/etc/theHarvester/api-keys.yaml
+      - ./proxies.yaml:/etc/theHarvester/proxies.yaml
+    build: .
+    ports:
+      - "8080:80"
+
+networks:
+  default:
+    name: app_custom_network
