@@ -38,9 +38,11 @@ def print_banner():
     print("Bienvenido a InfoHunter - Herramienta de OSINT")
 
 
-def recopilar_informacion_mail(mail: str, pyhunter_api_key: str):
+def recopilar_informacion_mail(
+    mail: str, pyhunter_api_key: str, breachdirectory_api_key: str
+):
     # Realizar una consulta
-    consultas.realizar_consulta_email(mail, pyhunter_api_key)
+    consultas.realizar_consulta_email(mail, pyhunter_api_key, breachdirectory_api_key)
 
 
 def recopilar_informacion_dominio(domain: str, pyhunter_api_key: str):
@@ -87,9 +89,10 @@ def main():
         recopilar_informacion_redes_sociales(username)
     if mail:
         pyhunter_api_key = keys_manager.get_key("pyhunter")
+        breachdirectory_api_key = keys_manager.get_key("breachdirectory")
         if pyhunter_api_key:  # Utilizar la clave de API
-            print(f"Clave de PyHunter: {pyhunter_api_key}")
-            recopilar_informacion_mail(mail, pyhunter_api_key)
+            # print(f"Clave de PyHunter: {pyhunter_api_key}")
+            recopilar_informacion_mail(mail, pyhunter_api_key, breachdirectory_api_key)
         else:
             print(
                 "La clave de PyHunter no se encuentra en el archivo de claves de API."

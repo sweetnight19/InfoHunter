@@ -1,6 +1,7 @@
 import sys
 import os
 from pyhunter import PyHunter
+import requests
 
 
 def obtener_informacion_redes_sociales(nombre: str):
@@ -41,20 +42,59 @@ def obtener_informacion_theHarvester(domain: str):
     os.system(comando)
 
 
-def obtener_informacion_email(apikey: str, mail: str):
+def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, mail: str):
     hunter = PyHunter(apikey)
     result = hunter.email_verifier(mail)
 
     if result["status"] == "valid":
         print("La dirección de correo electrónico es válida.")
-        print(result)
-        print("----------")
-        print("Nombre encontrado:", result["first_name"])
-        print("Apellido encontrado:", result["last_name"])
+        # print(result)
+        if "first_name" in result:
+            print("Nombre encontrado:", result["first_name"])
+        if "last_name" in result:
+            print("Apellido encontrado:", result["last_name"])
     else:
         print(
             "La dirección de correo electrónico no es válida o no se encontró información asociada."
         )
+
+    url = "https://breachdirectory.p.rapidapi.com/"
+
+    querystring = {"func": "auto", "term": mail}
+
+    headers = {
+        "X-RapidAPI-Key": breachdirectory_api_key,
+        "X-RapidAPI-Host": "breachdirectory.p.rapidapi.com",
+    }
+
+    response = requests.get(url, headers=headers, params=querystring)
+    if response.status_code == 200:
+        data = response.json()
+
+        # print(data)
+
+        # Verificar si la solicitud fue exitosa
+        if data.get("success", True):
+            # Obtener los resultados que cumplen con la condición "email_only false"
+            results = [
+                result
+                for result in data.get("result", [])
+                if not result.get("email_only", True)
+            ]
+
+            # Mostrar por pantalla los campos "line" separados por ":"
+            for result in results:
+                line = result.get("line", "")
+                username, password = line.split(":")
+                source = result.get("sources")[0]
+                print(f"Source: {source}")
+                print(f"Username: {username}")
+                print(f"Password: {password}")
+                print()
+        else:
+            print("La solicitud no fue exitosa.")
+    else:
+        print("Error en Breachdirectory API: " + response.status_code)
 
 
 def obtener_informacion_dominio(domain: str, apikey: str):

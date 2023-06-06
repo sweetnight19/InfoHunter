@@ -17,12 +17,12 @@ def realizar_consulta_redes_sociales(nombre: str):
     fuentes.obtener_informacion_redes_sociales(nombre)
 
 
-def realizar_consulta_email(mail: str, apikey: str):
-    fuentes.obtener_informacion_email(apikey, mail)
+def realizar_consulta_email(mail: str, apikey: str, breachdirectory_api_key: str):
+    fuentes.obtener_informacion_email(apikey, breachdirectory_api_key, mail)
 
 
 def realizar_consulta_dominio(domain, pyhunter_api_key):
-    # fuentes.obtener_informacion_dominio(domain, pyhunter_api_key)
+    fuentes.obtener_informacion_dominio(domain, pyhunter_api_key)
     fuentes.obtener_informacion_theHarvester(domain)
     generate_pdf_from_json(domain)
 
