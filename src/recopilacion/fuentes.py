@@ -2,19 +2,69 @@ import sys
 import os
 from pyhunter import PyHunter
 import requests
+import json
 
 
-def obtener_informacion_redes_sociales(nombre: str):
+def convert_txt_to_json(nombre: str, txt_file_path: str):
+    json_data = []
+    with open(txt_file_path, "r") as file:
+        lines = file.readlines()
+        for line in lines[:-1]:
+            website_url = line.strip()
+            json_obj = website_url
+            json_data.append(json_obj)
+
+    print(json.dumps(json_data, indent=4))
+
+    output_file_path = f"./output/{nombre}.json"
+    with open(output_file_path, "w") as file:
+        json.dump(json_data, file, indent=4)
+
+    print(
+        f"Se ha convertido el archivo '{txt_file_path}' a '{output_file_path}' en formato JSON."
+    )
+
+
+def sherlock(nombre: str):
     # Verificar el sistema operativo
     if sys.platform.startswith("linux") or sys.platform.startswith("darwin"):
         # Llamada al sistema en Linux
+        # comando = "python src/sherlock/sherlock/sherlock.py -fo output " + nombre
         comando = "python src/sherlock/sherlock/sherlock.py -fo output " + nombre
+
     else:
         # Llamada al sistema en otros sistemas operativos
         comando = "python src\sherlock\sherlock\sherlock.py -fo output " + nombre
 
     # Ejecutar el comando y capturar la salida
     os.system(comando)
+
+
+def maigret(nombre: str):
+    # Verificar el sistema operativo
+    if sys.platform.startswith("linux") or sys.platform.startswith("darwin"):
+        # Llamada al sistema en Linux
+        comando = (
+            "python src/maigret/maigret.py --timeout 10 -n 1000 -fo output -J simple "
+            + nombre
+        )
+
+    else:
+        # Llamada al sistema en otros sistemas operativos
+        comando = (
+            "python src\maigret\maigret.py --timeout 10 -n 1000 -fo output -J simple "
+            + nombre
+        )
+
+    # Ejecutar el comando y capturar la salida
+    os.system(comando)
+
+
+def obtener_informacion_redes_sociales(nombre: str):
+    # sherlock(nombre)
+    txt_file_path = "./output/" + nombre + ".txt"
+    convert_txt_to_json(nombre, txt_file_path)
+    # maigret(nombre)
 
 
 def obtener_informacion_theHarvester(domain: str):
