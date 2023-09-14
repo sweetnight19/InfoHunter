@@ -14,7 +14,8 @@ def realizar_consulta_redes_sociales(nombre: str):
     verificar_carpeta_output()
 
     # Consultamos las redes sociales
-    fuentes.obtener_informacion_redes_sociales(nombre)
+    # fuentes.obtener_informacion_redes_sociales(nombre)
+    pass
 
 
 def realizar_consulta_email(mail: str, apikey: str, breachdirectory_api_key: str):

@@ -58,9 +58,9 @@ InfoHunter es una herramienta desarrollada en Python que utiliza técnicas de OS
 
 A continuación se muestra el plan de desarrollo para el proyecto:
 
-- [ ] Implementación de la búsqueda de información en fuentes abiertas.
-- [ ] Análisis de datos recopilados para crear perfiles de personas y empresas.
-- [ ] Identificación de posibles riesgos de seguridad y privacidad.
+- [x] Implementación de la búsqueda de información en fuentes abiertas.
+- [x] Análisis de datos recopilados para crear perfiles de personas y empresas.
+- [x] Identificación de posibles riesgos de seguridad y privacidad.
 - [ ] Establecimiento de medidas para proteger la privacidad y seguridad.
 - [ ] Evaluación de la eficacia de las medidas implementadas.
 

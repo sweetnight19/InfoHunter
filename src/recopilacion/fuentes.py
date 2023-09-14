@@ -61,10 +61,10 @@ def maigret(nombre: str):
 
 
 def obtener_informacion_redes_sociales(nombre: str):
-    # sherlock(nombre)
+    sherlock(nombre)
     txt_file_path = "./output/" + nombre + ".txt"
     convert_txt_to_json(nombre, txt_file_path)
-    # maigret(nombre)
+    maigret(nombre)
 
 
 def obtener_informacion_theHarvester(domain: str):
@@ -121,7 +121,7 @@ def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, mail: s
     if response.status_code == 200:
         data = response.json()
 
-        # print(data)
+        #print(data)
 
         # Verificar si la solicitud fue exitosa
         if data.get("success", True):
