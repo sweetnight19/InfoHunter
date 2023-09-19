@@ -3,6 +3,8 @@ import os
 from pyhunter import PyHunter
 import requests
 import json
+from src.riesgos import evaluacion
+from src.evaluacion import mejoras
 
 
 def convert_txt_to_json(nombre: str, txt_file_path: str):
@@ -98,7 +100,7 @@ def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, mail: s
 
     if result["status"] == "valid":
         print("La dirección de correo electrónico es válida.")
-        # print(result)
+        #print(result)
         if "first_name" in result:
             print("Nombre encontrado:", result["first_name"])
         if "last_name" in result:
@@ -108,6 +110,8 @@ def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, mail: s
             "La dirección de correo electrónico no es válida o no se encontró información asociada."
         )
 
+    
+    print("2. Buscando filtracion de datos...")
     url = "https://breachdirectory.p.rapidapi.com/"
 
     querystring = {"func": "auto", "term": mail}
@@ -131,7 +135,7 @@ def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, mail: s
                 for result in data.get("result", [])
                 if not result.get("email_only", True)
             ]
-
+            
             # Mostrar por pantalla los campos "line" separados por ":"
             for result in results:
                 line = result.get("line", "")
@@ -141,10 +145,20 @@ def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, mail: s
                 print(f"Username: {username}")
                 print(f"Password: {password}")
                 print()
+            
+            #print(results)
+            # 3. Identificar riesgos de seguridad o privacidad
+            print("3. Identificando riesgos")
+            print("4. Realizando evaluación")
+            evaluacion_resultante = evaluacion.generar_evaluacion_y_recomendaciones(results)
+            
+            print("5. Generando informe en PDF")
+            mejoras.generar_report_mail(evaluacion_resultante)
+            
         else:
             print("La solicitud no fue exitosa.")
     else:
-        print("Error en Breachdirectory API: " + response.status_code)
+        print("Error en Breachdirectory API: " + str(response.status_code))
 
 
 def obtener_informacion_dominio(domain: str, apikey: str):

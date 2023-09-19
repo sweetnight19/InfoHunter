@@ -61,8 +61,8 @@ A continuación se muestra el plan de desarrollo para el proyecto:
 - [x] Implementación de la búsqueda de información en fuentes abiertas.
 - [x] Análisis de datos recopilados para crear perfiles de personas y empresas.
 - [x] Identificación de posibles riesgos de seguridad y privacidad.
-- [ ] Establecimiento de medidas para proteger la privacidad y seguridad.
-- [ ] Evaluación de la eficacia de las medidas implementadas.
+- [x] Establecimiento de medidas para proteger la privacidad y seguridad.
+- [x] Evaluación de la eficacia de las medidas implementadas.
 
 ## 👤 Autor
 

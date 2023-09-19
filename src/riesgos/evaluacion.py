@@ -1,216 +1,111 @@
 import json
+import random
 
 
-# En este ejemplo, se itera sobre cada red social en los datos y se evalúa el nivel de riesgo de privacidad específico para cada una.
-# En el caso de Reddit, se verifican ciertos campos en los datos y se incrementa el nivel de riesgo de privacidad en función de la presencia de información sensible (por ejemplo, si el usuario es empleado, moderador o si el contenido es NSFW).
-# Puedes agregar más condiciones y lógica de evaluación de riesgo para otras redes sociales según tus necesidades.
-def evaluar_privacidad(datos):
-    riesgo_privacidad = 0
+def generar_evaluacion_y_recomendaciones(data):
+    evaluacion = []
+    
+    # Clasificar automáticamente como "Crítico"
+    nivel_critico = 'Crítico'
 
-    # Evaluar el nivel de riesgo de privacidad para cada red social en los datos
-    for red_social, datos_red_social in datos.items():
-        if red_social == "Reddit":
-            # Evaluar el riesgo de privacidad en los datos de Reddit
-            if "status" in datos_red_social and "ids" in datos_red_social["status"]:
-                ids = datos_red_social["status"]["ids"]
-                # Verificar si hay información sensible en los IDs de Reddit
-                if ids.get("is_employee", "").lower() == "true":
-                    riesgo_privacidad += 3
-                if ids.get("is_mod", "").lower() == "true":
-                    riesgo_privacidad += 2
-                if ids.get("is_nsfw", "").lower() == "true":
-                    riesgo_privacidad += 1
+    # Definir recomendaciones basadas en la evaluación
+    recomendaciones_data_leak = [
+        {"recomendacion": "Cambie inmediatamente la contraseña de la cuenta afectada.", "impacto": "Alto"},
+        {"recomendacion": "Habilite la autenticación de dos factores (2FA) para mejorar la seguridad de su cuenta.", "impacto": "Medio"},
+        {"recomendacion": "Revise todas sus cuentas en busca de contraseñas reutilizadas y cámbielas.", "impacto": "Alto"},
+        {"recomendacion": "Monitoree sus cuentas bancarias y financieras en busca de actividad no autorizada.", "impacto": "Alto"},
+        {"recomendacion": "Sea escéptico ante los correos electrónicos o mensajes sospechosos y evite hacer clic en enlaces no verificados.", "impacto": "Medio"},
+        {"recomendacion": "Informe a las autoridades pertinentes y a las plataformas en caso de fraude o robo de identidad.", "impacto": "Alto"},
+        {"recomendacion": "Utilice una solución de gestión de contraseñas para crear y almacenar contraseñas seguras.", "impacto": "Medio"},
+        {"recomendacion": "Mantenga sus sistemas y software actualizados para protegerse contra vulnerabilidades conocidas.", "impacto": "Alto"},
+        {"recomendacion": "Revise la configuración de privacidad de sus cuentas en línea y limpie la información personal innecesaria.", "impacto": "Medio"},
+        {"recomendacion": "Eduque a sus contactos sobre las amenazas en línea y promueva prácticas seguras.", "impacto": "Bajo"},
+    ]
 
-        # Agrega más condiciones para evaluar el riesgo de privacidad en otras redes sociales
+    for entry in data:
+        email = entry['line'].split(':')[0]
+        breaches = entry['sources']
+        last_breach = entry['last_breach']
+        password = entry['line'].split(':')[1]
 
-    return riesgo_privacidad
-
-
-# Se itera sobre cada red social en los datos y se evalúa el nivel de riesgo de reputación específico para cada una.
-# En el caso de Reddit, se verifica si el campo "total_karma" en los datos está por debajo de cierto umbral (en este caso, 1000) y se incrementa el nivel de riesgo de reputación en consecuencia.
-# Puedes agregar más condiciones y lógica de evaluación de riesgo para otras redes sociales según tus necesidades.
-def evaluar_reputacion(datos):
-    riesgo_reputacion = 0
-
-    # Evaluar el nivel de riesgo de reputación para cada red social en los datos
-    for red_social, datos_red_social in datos.items():
-        if red_social == "Reddit":
-            # Evaluar el riesgo de reputación en los datos de Reddit
-            if "status" in datos_red_social:
-                status = datos_red_social["status"]
-                # Verificar si el usuario tiene baja reputación en Reddit
-                if status.get("total_karma", 0) < 1000:
-                    riesgo_reputacion += 2
-
-        # Agrega más condiciones para evaluar el riesgo de reputación en otras redes sociales
-
-    return riesgo_reputacion
-
-
-# Se itera sobre cada red social en los datos y se evalúa el nivel de riesgo de seguridad específico para cada una.
-# En el caso de Reddit, se verifica si el campo "http_status" en los datos indica un código de error HTTP mayor o igual a 400 y se incrementa el nivel de riesgo de seguridad en consecuencia.
-# Puedes agregar más condiciones y lógica de evaluación de riesgo para otras redes sociales según tus necesidades.
-def evaluar_seguridad(datos):
-    riesgo_seguridad = 0
-
-    # Evaluar el nivel de riesgo de seguridad para cada red social en los datos
-    for red_social, datos_red_social in datos.items():
-        if red_social == "Reddit":
-            # Evaluar el riesgo de seguridad en los datos de Reddit
-            if "http_status" in datos_red_social:
-                http_status = datos_red_social["http_status"]
-                # Verificar si la respuesta HTTP indica un error de seguridad
-                if http_status >= 400:
-                    riesgo_seguridad += 3
-
-        # Agrega más condiciones para evaluar el riesgo de seguridad en otras redes sociales
-
-    return riesgo_seguridad
-
-
-# Se itera sobre cada red social en los datos y se evalúa el nivel de riesgo de configuración de privacidad específico para cada una.
-# En el caso de Reddit, se verifica si el campo "status" en los datos contiene información sobre los identificadores de usuario ("ids") y se verifica si el perfil de usuario está configurado como privado.
-# Si es así, se incrementa el nivel de riesgo de configuración de privacidad en consecuencia.
-# Puedes agregar más condiciones y lógica de evaluación de riesgo para otras redes sociales según tus necesidades.
-def evaluar_configuracion_privacidad(datos):
-    riesgo_configuracion = 0
-
-    # Evaluar el nivel de riesgo de configuración de privacidad para cada red social en los datos
-    for red_social, datos_red_social in datos.items():
-        if red_social == "Reddit":
-            # Evaluar el riesgo de configuración de privacidad en los datos de Reddit
-            if "status" in datos_red_social:
-                status = datos_red_social["status"]
-                if "ids" in status:
-                    ids = status["ids"]
-                    if "is_private" in ids:
-                        is_private = ids["is_private"]
-                        # Verificar si el perfil de usuario está configurado como privado
-                        if is_private == "True":
-                            riesgo_configuracion += 2
-
-        # Agrega más condiciones para evaluar el riesgo de configuración de privacidad en otras redes sociales
-
-    return riesgo_configuracion
-
-
-# Se itera sobre cada red social en los datos y se evalúa el nivel de riesgo de cumplimiento legal específico para cada una.
-# En el caso de Reddit, se verifica si el campo "status" en los datos contiene información sobre si el contenido asociado al perfil es considerado para adultos (NSFW).
-# Si es así, se incrementa el nivel de riesgo de cumplimiento legal en consecuencia.
-# Puedes agregar más condiciones y lógica de evaluación de riesgo para otras redes sociales según tus necesidades.
-def evaluar_cumplimiento_legal(datos):
-    riesgo_cumplimiento = 0
-
-    # Evaluar el nivel de riesgo de cumplimiento legal para cada red social en los datos
-    for red_social, datos_red_social in datos.items():
-        if red_social == "Reddit":
-            # Evaluar el riesgo de cumplimiento legal en los datos de Reddit
-            if "status" in datos_red_social:
-                status = datos_red_social["status"]
-                if "is_nsfw" in status:
-                    is_nsfw = status["is_nsfw"]
-                    # Verificar si el contenido asociado al perfil es considerado para adultos (NSFW)
-                    if is_nsfw == "True":
-                        riesgo_cumplimiento += 3
-
-        # Agrega más condiciones para evaluar el riesgo de cumplimiento legal en otras redes sociales
-
-    return riesgo_cumplimiento
-
+        evaluacion.append({
+            'Email': email,
+            'Breaches': breaches,
+            'Password': password,
+            'Last Breach': last_breach,
+            'Nivel de Criticidad': nivel_critico,
+            'Recomendaciones': random.sample(recomendaciones_data_leak, 2)
+        })
+    #Debug
+    print(evaluacion)
+    
+    return evaluacion
 
 def identificar_riesgos_username(username: str):
     # Leer los datos de redes sociales del archivo JSON
-    file_path = f"output/maigret_{username}.json"
+    file_path = f"output/report_{username}_simple.json"
     with open(file_path, "r") as file:
         datos_redes_sociales = json.load(file)
+        
+    # Crear una variable para almacenar los datos importantes
+    datos_importantes = {}
 
-    # Definir un diccionario vacío para almacenar los riesgos
-    riesgos = {}
+    # Definir el nivel crítico común para todas las redes sociales
+    nivel_critico_comun = "Medio"
 
-    riesgos["privacidad"] = {
-        "tipo": "privacidad",
-        "descripcion": "Riesgo de divulgación no autorizada de información personal.",
-        "impacto": "",
-        "probabilidad": "",
-        "valoracion": "",
-    }
+    # Lista de recomendaciones para nivel crítico medio
+    recomendaciones_medio = [
+        {"recomendacion": "Revise cuidadosamente su configuración de privacidad y ajuste la visibilidad de su perfil y publicaciones según sea necesario.", "impacto": "Bajo"},
+        {"recomendacion": "Sea cauteloso al aceptar solicitudes de amistad o seguir a personas desconocidas.", "impacto": "Medio"},
+        {"recomendacion": "Regularmente revise su actividad y ajuste la configuración de notificaciones para mantener un mayor control sobre su cuenta.", "impacto": "Alto"},
+        {"recomendacion": "Evite compartir datos personales o sensibles en sus publicaciones.", "impacto": "Medio"},
+        {"recomendacion": "Use autenticación de dos factores (2FA) si está disponible para mejorar la seguridad de su cuenta.", "impacto": "Alto"},
+        {"recomendacion": "Mantenga sus contraseñas seguras y cambie regularmente las contraseñas de sus cuentas.", "impacto": "Alto"},
+        {"recomendacion": "Desactive las ubicaciones geográficas en sus publicaciones para proteger su privacidad.", "impacto": "Medio"},
+        {"recomendacion": "No comparta información confidencial, como números de teléfono o direcciones, en su perfil público.", "impacto": "Medio"},
+        {"recomendacion": "Sea escéptico ante las ofertas o enlaces sospechosos que reciba a través de mensajes directos.", "impacto": "Medio"},
+        {"recomendacion": "Revise periódicamente las aplicaciones y servicios vinculados a su cuenta y elimine los que ya no usa o confía.", "impacto": "Bajo"},
+        {"recomendacion": "Informe de inmediato cualquier actividad o cuenta sospechosa a la plataforma de redes sociales.", "impacto": "Alto"},
+        {"recomendacion": "No revele su ubicación en tiempo real a través de las redes sociales, especialmente si está fuera de casa.", "impacto": "Medio"},
+        {"recomendacion": "Tenga cuidado con las aplicaciones de terceros y asegúrese de que tengan buenas calificaciones y reseñas antes de autorizarlas.", "impacto": "Medio"},
+    ]
 
-    riesgos["reputacion"] = {
-        "tipo": "reputacion",
-        "descripcion": "Riesgo de daño a la reputación de la persona o entidad.",
-        "impacto": "",
-        "probabilidad": "",
-        "valoracion": "",
-    }
+    # Extraer los datos importantes y almacenarlos en la variable
+    for red_social, detalles in datos_redes_sociales.items():
+        datos_importantes[red_social] = {
+            "status": detalles["status"],
+            "url_user": detalles["url_user"],
+            "nivel_critico": nivel_critico_comun,
+            "recomendaciones":random.sample(recomendaciones_medio, 2)
+        }
 
-    riesgos["seguridad"] = {
-        "tipo": "seguridad",
-        "descripcion": "Riesgo de acceso no autorizado a la cuenta o datos sensibles.",
-        "impacto": "",
-        "probabilidad": "",
-        "valoracion": "",
-    }
+    # Asignar el nivel crítico común a todas las redes sociales
+    #datos_importantes[red_social]["status"]["nivel_critico"] = nivel_critico_comun
 
-    riesgos["configuracion_privacidad"] = {
-        "tipo": "configuracion_privacidad",
-        "descripcion": "Riesgo de configuraciones inadecuadas que afecten la privacidad.",
-        "impacto": "",
-        "probabilidad": "",
-        "valoracion": "",
-    }
+    # Seleccionar un conjunto aleatorio de 3 recomendaciones de nivel crítico medio
+    #recomendaciones_seleccionadas = random.sample(recomendaciones_medio, 3)
 
-    riesgos["cumplimiento_legal"] = {
-        "tipo": "cumplimiento_legal",
-        "descripcion": "Riesgo de incumplimiento de regulaciones legales y normativas.",
-        "impacto": "",
-        "probabilidad": "",
-        "valoracion": "",
-    }
+    # Agregar las recomendaciones al diccionario de datos importantes
+    #datos_importantes[red_social]["recomendaciones"] = recomendaciones_seleccionadas
 
-    for datos in datos_redes_sociales.items():
-        # Evaluar la privacidad de la información
-        riesgo_privacidad = evaluar_privacidad(datos)
-        riesgos.append(riesgo_privacidad)
-
-        # Evaluar la reputación y daño a la imagen
-        riesgo_reputacion = evaluar_reputacion(datos)
-        riesgos.append(riesgo_reputacion)
-
-        # Evaluar las amenazas de seguridad
-        riesgo_seguridad = evaluar_seguridad(datos)
-        riesgos.append(riesgo_seguridad)
-
-        # Evaluar la configuración de privacidad
-        riesgo_configuracion = evaluar_configuracion_privacidad(datos)
-        riesgos.append(riesgo_configuracion)
-
-        # Evaluar el cumplimiento legal
-        riesgo_cumplimiento = evaluar_cumplimiento_legal(datos)
-        riesgos.append(riesgo_cumplimiento)
-
-    # Aplicar la norma ISO 27001
-    criterios_iso = {
-        "privacidad": 0.8,
-        "reputacion": 0.6,
-        "seguridad": 0.9,
-        "configuracion": 0.7,
-        "cumplimiento": 0.5,
-    }
-
-    riesgos_iso = []
-
-    print(riesgos)
-
-    for riesgo in riesgos:
-        riesgo_iso = riesgo.get("riesgo", 0) * criterios_iso.get(
-            riesgo.get("tipo", ""), 0
-        )
-        riesgos_iso.append(riesgo_iso)
-
-    # Mostrar los resultados de la evaluación ISO
-    print(
-        "Resultado de la evaluación de riesgos según la norma ISO 27001 para el usuario:",
-        username,
-    )
-    for riesgo in riesgos_iso:
-        print("- Riesgo:", riesgo)
+    # Imprimir los datos importantes con las recomendaciones y niveles de impacto
+    """
+    for red_social, detalles in datos_importantes.items():
+        print(f"Red Social: {red_social}")
+        print(f"Estado: {detalles['status']['estado']}")
+        print(f"Nivel Crítico: {detalles['status']['nivel_critico']}")
+        print(f"URL del Usuario: {detalles['url_user']}")
+        print("Recomendaciones:")
+        for idx, recomendacion_info in enumerate(detalles['recomendaciones'], start=1):
+            recomendacion = recomendacion_info["recomendacion"]
+            impacto = recomendacion_info["impacto"]
+            print(f"{idx}. Recomendación: {recomendacion}")
+            print(f"   Nivel de Impacto: {impacto}")
+        print("\n")
+    """
+    
+    #Debug    
+    print(datos_importantes)
+    
+    return datos_importantes
+        
