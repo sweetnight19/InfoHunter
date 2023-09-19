@@ -18,8 +18,8 @@ def realizar_consulta_redes_sociales(nombre: str):
     fuentes.obtener_informacion_redes_sociales(nombre)
     
 
-def realizar_consulta_email(mail: str, apikey: str, breachdirectory_api_key: str):
-    fuentes.obtener_informacion_email(apikey, breachdirectory_api_key, mail)
+def realizar_consulta_email(mail: str, apikey: str, breachdirectory_api_key: str,similar_web_api_key:str):
+    fuentes.obtener_informacion_email(apikey, breachdirectory_api_key, similar_web_api_key,mail)
 
 
 def realizar_consulta_dominio(domain, pyhunter_api_key):

@@ -16567,7 +16567,7 @@
             ],
             "source": "Twitter",
             "alexaRank": 48,
-            "urlMain": "https://nitter.1d4.us/",
+            "urlMain": "https://nitter.42l.fr/",
             "url": "{urlMain}{username}",
             "usernameClaimed": "blue",
             "usernameUnclaimed": "noonewould123"
@@ -17088,7 +17088,7 @@
                 "video"
             ],
             "headers": {
-                "Authorization": "jwt eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2ODY2NjI1MjAsInVzZXJfaWQiOm51bGwsImFwcF9pZCI6NTg0NzksInNjb3BlcyI6InB1YmxpYyIsInRlYW1fdXNlcl9pZCI6bnVsbH0.Pn-N356cVlLL0wcWmd0qaI2fR8L1dUWXXi8BN9o2M1c"
+                "Authorization": "jwt eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2OTUxNTgxNjAsInVzZXJfaWQiOm51bGwsImFwcF9pZCI6NTg0NzksInNjb3BlcyI6InB1YmxpYyIsInRlYW1fdXNlcl9pZCI6bnVsbH0.bos5hUuzgzrnMeIxrKozqJ41qqHZvMiq41y3kbKyEI4"
             },
             "activation": {
                 "url": "https://vimeo.com/_rv/viewer",

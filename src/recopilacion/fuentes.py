@@ -94,7 +94,7 @@ def obtener_informacion_theHarvester(domain: str):
     os.system(comando)
 
 
-def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, mail: str):
+def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, similar_web_api_key:str,mail: str):
     hunter = PyHunter(apikey)
     result = hunter.email_verifier(mail)
 
@@ -150,7 +150,7 @@ def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, mail: s
             # 3. Identificar riesgos de seguridad o privacidad
             print("3. Identificando riesgos")
             print("4. Realizando evaluación")
-            evaluacion_resultante = evaluacion.generar_evaluacion_y_recomendaciones(results)
+            evaluacion_resultante = evaluacion.generar_evaluacion_y_recomendaciones(results,similar_web_api_key)
             
             print("5. Generando informe en PDF")
             mejoras.generar_report_mail(evaluacion_resultante)

@@ -1,13 +1,27 @@
-import json
-import random
+import json, random, requests
 
+def getAlexaRank(domain:str,similar_web_api_key:str):
+    url = "https://similarweb12.p.rapidapi.com/v1/website-analytics/"
 
-def generar_evaluacion_y_recomendaciones(data):
+    querystring = {"domain":domain}
+
+    headers = {
+        "X-RapidAPI-Key": similar_web_api_key,
+        "X-RapidAPI-Host": "similarweb12.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers, params=querystring)
+    response=response.json()
+    #print(response)
+    rank_global = response['overview']['globalRank']
+    aux=asignar_nivel_criticidad(rank_global)
+    return aux
+
+def generar_evaluacion_y_recomendaciones(data,similar_web_api_key):
     evaluacion = []
     
-    # Clasificar automáticamente como "Crítico"
-    nivel_critico = 'Crítico'
-
+    #print(data)
+    
     # Definir recomendaciones basadas en la evaluación
     recomendaciones_data_leak = [
         {"recomendacion": "Cambie inmediatamente la contraseña de la cuenta afectada.", "impacto": "Alto"},
@@ -23,6 +37,11 @@ def generar_evaluacion_y_recomendaciones(data):
     ]
 
     for entry in data:
+        aux=entry['sources'][0]
+        aux= aux.strip("[]'")
+        aux=str(aux)
+        nivel_critico=getAlexaRank(aux,similar_web_api_key)
+        
         email = entry['line'].split(':')[0]
         breaches = entry['sources']
         last_breach = entry['last_breach']
@@ -41,6 +60,16 @@ def generar_evaluacion_y_recomendaciones(data):
     
     return evaluacion
 
+def asignar_nivel_criticidad(alexa_rank):
+    if alexa_rank < 1000:
+        return 'Crítico'
+    elif alexa_rank < 10000:
+        return 'Alto'
+    elif alexa_rank < 100000:
+        return 'Medio'
+    else:
+        return 'Bajo'
+    
 def identificar_riesgos_username(username: str):
     # Leer los datos de redes sociales del archivo JSON
     file_path = f"output/report_{username}_simple.json"
@@ -49,9 +78,6 @@ def identificar_riesgos_username(username: str):
         
     # Crear una variable para almacenar los datos importantes
     datos_importantes = {}
-
-    # Definir el nivel crítico común para todas las redes sociales
-    nivel_critico_comun = "Medio"
 
     # Lista de recomendaciones para nivel crítico medio
     recomendaciones_medio = [
@@ -72,40 +98,18 @@ def identificar_riesgos_username(username: str):
 
     # Extraer los datos importantes y almacenarlos en la variable
     for red_social, detalles in datos_redes_sociales.items():
+        alexa_rank = detalles['site']['alexaRank']
+        nivel_criticidad = asignar_nivel_criticidad(alexa_rank)
+        
         datos_importantes[red_social] = {
             "status": detalles["status"],
             "url_user": detalles["url_user"],
-            "nivel_critico": nivel_critico_comun,
+            "nivel_critico": nivel_criticidad,
             "recomendaciones":random.sample(recomendaciones_medio, 2)
         }
-
-    # Asignar el nivel crítico común a todas las redes sociales
-    #datos_importantes[red_social]["status"]["nivel_critico"] = nivel_critico_comun
-
-    # Seleccionar un conjunto aleatorio de 3 recomendaciones de nivel crítico medio
-    #recomendaciones_seleccionadas = random.sample(recomendaciones_medio, 3)
-
-    # Agregar las recomendaciones al diccionario de datos importantes
-    #datos_importantes[red_social]["recomendaciones"] = recomendaciones_seleccionadas
-
-    # Imprimir los datos importantes con las recomendaciones y niveles de impacto
-    """
-    for red_social, detalles in datos_importantes.items():
-        print(f"Red Social: {red_social}")
-        print(f"Estado: {detalles['status']['estado']}")
-        print(f"Nivel Crítico: {detalles['status']['nivel_critico']}")
-        print(f"URL del Usuario: {detalles['url_user']}")
-        print("Recomendaciones:")
-        for idx, recomendacion_info in enumerate(detalles['recomendaciones'], start=1):
-            recomendacion = recomendacion_info["recomendacion"]
-            impacto = recomendacion_info["impacto"]
-            print(f"{idx}. Recomendación: {recomendacion}")
-            print(f"   Nivel de Impacto: {impacto}")
-        print("\n")
-    """
     
     #Debug    
-    print(datos_importantes)
+    #print(datos_importantes)
     
     return datos_importantes
         
