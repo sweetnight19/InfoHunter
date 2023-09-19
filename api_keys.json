@@ -1,3 +1,5 @@
 {
-    "pyhunter": "API-KEY"
+    "pyhunter": "API-KEY",
+    "hibp-api-key": "API-KEY",
+    "breachdirectory": "API-KEY"
 }
