@@ -37,7 +37,7 @@ def generar_evaluacion_y_recomendaciones(data):
             'Recomendaciones': random.sample(recomendaciones_data_leak, 2)
         })
     #Debug
-    print(evaluacion)
+    #print(evaluacion)
     
     return evaluacion
 

@@ -164,8 +164,9 @@ def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, mail: s
 def obtener_informacion_dominio(domain: str, apikey: str):
     hunter = PyHunter(apikey)
     result = hunter.domain_search(domain)
+    
 
-    if result["domain"] != None:
+    if result["domain"] != None:      
         comprobar_none(result["domain"], "Dominio")
         comprobar_none(result["organization"], "Nombre de la organización: ")
         comprobar_none(result["organization"], "Descripcion: ")
@@ -199,6 +200,8 @@ def obtener_informacion_dominio(domain: str, apikey: str):
             comprobar_none(email["linkedin"], "\t\t- LinkedIn: ")
             comprobar_none(email["phone_number"], "\t\t- Telefono: ")
             print("\n")
+
+            return result
     else:
         print(
             "La dirección de correo electrónico no es válida o no se encontró información asociada."

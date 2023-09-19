@@ -2,6 +2,7 @@ from . import fuentes
 import os
 import json
 from fpdf import FPDF
+from src.evaluacion import mejoras
 
 
 def verificar_carpeta_output():
@@ -22,9 +23,11 @@ def realizar_consulta_email(mail: str, apikey: str, breachdirectory_api_key: str
 
 
 def realizar_consulta_dominio(domain, pyhunter_api_key):
-    fuentes.obtener_informacion_dominio(domain, pyhunter_api_key)
+    datos_pyhunter=fuentes.obtener_informacion_dominio(domain, pyhunter_api_key)
+    #mejoras.generar_report_domain(datos_pyhunter)
     fuentes.obtener_informacion_theHarvester(domain)
-    generate_pdf_from_json(domain)
+    mejoras.generar_report_domain(datos_pyhunter,domain)
+    #generate_pdf_from_json(domain)
 
 
 class PDF(FPDF):
