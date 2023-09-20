@@ -22,8 +22,8 @@ def realizar_consulta_email(mail: str, apikey: str, breachdirectory_api_key: str
     fuentes.obtener_informacion_email(apikey, breachdirectory_api_key, similar_web_api_key,mail)
 
 
-def realizar_consulta_dominio(domain, pyhunter_api_key):
-    datos_pyhunter=fuentes.obtener_informacion_dominio(domain, pyhunter_api_key)
+def realizar_consulta_dominio(domain, pyhunter_api_key,similar_web_api_key):
+    datos_pyhunter=fuentes.obtener_informacion_dominio(domain, pyhunter_api_key,similar_web_api_key)
     #mejoras.generar_report_domain(datos_pyhunter)
     fuentes.obtener_informacion_theHarvester(domain)
     mejoras.generar_report_domain(datos_pyhunter,domain)

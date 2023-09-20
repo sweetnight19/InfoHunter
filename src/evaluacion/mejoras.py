@@ -201,6 +201,7 @@ def generar_report_domain(data,domain):
     # Agregar información de PyHunter
     contenido.append(Paragraph('<b>Dominio:</b> {}'.format(data['domain']), parrafo_style))
     contenido.append(Paragraph('<b>Nombre de la Organización:</b> {}'.format(data['organization']), parrafo_style))
+    contenido.append(Paragraph('<b>Alexa Rank:</b> {}'.format(data['alexa_rank']), parrafo_style))
     contenido.append(Paragraph('<b>Descripción:</b> {}'.format(data['description']), parrafo_style))
     contenido.append(Paragraph('<b>Industria:</b> {}'.format(data['industry']), parrafo_style))
     contenido.append(Paragraph('<b>País:</b> {}'.format(data['country']), parrafo_style))

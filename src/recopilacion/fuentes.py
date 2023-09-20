@@ -161,7 +161,7 @@ def obtener_informacion_email(apikey: str, breachdirectory_api_key: str, similar
         print("Error en Breachdirectory API: " + str(response.status_code))
 
 
-def obtener_informacion_dominio(domain: str, apikey: str):
+def obtener_informacion_dominio(domain: str, apikey: str,similar_web_api_key:str):
     hunter = PyHunter(apikey)
     result = hunter.domain_search(domain)
     
@@ -200,8 +200,10 @@ def obtener_informacion_dominio(domain: str, apikey: str):
             comprobar_none(email["linkedin"], "\t\t- LinkedIn: ")
             comprobar_none(email["phone_number"], "\t\t- Telefono: ")
             print("\n")
-
-            return result
+            
+        
+        result["alexa_rank"]=evaluacion.getAlexaRank(domain,similar_web_api_key)
+        return result
     else:
         print(
             "La dirección de correo electrónico no es válida o no se encontró información asociada."
