@@ -1,21 +1,21 @@
-import json, random, requests
+import json, random, requests, time
 
 def getAlexaRank(domain:str,similar_web_api_key:str):
-    url = "https://similarweb12.p.rapidapi.com/v1/website-analytics/"
+    try:
+        url = "https://similarweb12.p.rapidapi.com/v1/website-analytics/"
+        querystring = {"domain":domain}
+        headers = {
+            "X-RapidAPI-Key": similar_web_api_key,
+            "X-RapidAPI-Host": "similarweb12.p.rapidapi.com"
+        }
 
-    querystring = {"domain":domain}
-
-    headers = {
-        "X-RapidAPI-Key": similar_web_api_key,
-        "X-RapidAPI-Host": "similarweb12.p.rapidapi.com"
-    }
-
-    response = requests.get(url, headers=headers, params=querystring)
-    response=response.json()
-    #print(response)
-    rank_global = response['overview']['globalRank']
-    aux=asignar_nivel_criticidad(rank_global)
-    return aux
+        response = requests.get(url, headers=headers, params=querystring)
+        response=response.json()
+        rank_global = response['overview']['globalRank']
+        aux=asignar_nivel_criticidad(rank_global)
+        return aux
+    except:
+        return "Medio"
 
 def generar_evaluacion_y_recomendaciones(data,similar_web_api_key):
     evaluacion = []
