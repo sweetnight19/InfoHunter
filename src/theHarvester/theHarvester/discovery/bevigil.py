@@ -1,30 +1,35 @@
-from theHarvester.discovery.constants import MissingKey
-from theHarvester.lib.core import *
 from typing import Set
+
+from theHarvester.discovery.constants import MissingKey
+from theHarvester.lib.core import AsyncFetcher, Core
 
 
 class SearchBeVigil:
-
     def __init__(self, word) -> None:
         self.word = word
         self.totalhosts: Set = set()
         self.interestingurls: Set = set()
         self.key = Core.bevigil_key()
         if self.key is None:
-            raise MissingKey('bevigil')
+            self.key = ""
+            raise MissingKey("bevigil")
         self.proxy = False
 
     async def do_search(self) -> None:
         subdomain_endpoint = f"https://osint.bevigil.com/api/{self.word}/subdomains/"
         url_endpoint = f"https://osint.bevigil.com/api/{self.word}/urls/"
-        headers = {'X-Access-Token': self.key}
+        headers = {"X-Access-Token": self.key}
 
-        responses = await AsyncFetcher.fetch_all([subdomain_endpoint], json=True, proxy=self.proxy, headers=headers)
+        responses = await AsyncFetcher.fetch_all(
+            [subdomain_endpoint], json=True, proxy=self.proxy, headers=headers
+        )
         response = responses[0]
         for subdomain in response["subdomains"]:
             self.totalhosts.add(subdomain)
 
-        responses = await AsyncFetcher.fetch_all([url_endpoint], json=True, proxy=self.proxy, headers=headers)
+        responses = await AsyncFetcher.fetch_all(
+            [url_endpoint], json=True, proxy=self.proxy, headers=headers
+        )
         response = responses[0]
         for url in response["urls"]:
             self.interestingurls.add(url)

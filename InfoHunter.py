@@ -96,18 +96,26 @@ def print_banner():
 
 
 def recopilar_informacion_mail(
-    mail: str, pyhunter_api_key: str, breachdirectory_api_key: str
-, similar_web_api_key:str):
+    mail: str,
+    pyhunter_api_key: str,
+    breachdirectory_api_key: str,
+    similar_web_api_key: str,
+):
     # Realizar una consulta
-    consultas.realizar_consulta_email(mail, pyhunter_api_key, breachdirectory_api_key,similar_web_api_key)
+    consultas.realizar_consulta_email(
+        mail, pyhunter_api_key, breachdirectory_api_key, similar_web_api_key
+    )
 
     # Llamar a la función para borrar archivos no PDF en la carpeta "output/"
     borrar_archivos_no_pdf("output")
 
-def recopilar_informacion_dominio(domain: str, pyhunter_api_key: str):
+
+def recopilar_informacion_dominio(
+    domain: str, pyhunter_api_key: str, similar_web_api_key: str
+):
     # Realizar una consulta
-    consultas.realizar_consulta_dominio(domain, pyhunter_api_key)
-    
+    consultas.realizar_consulta_dominio(domain, pyhunter_api_key, similar_web_api_key)
+
     # Llamar a la función para borrar archivos no PDF en la carpeta "output/"
     borrar_archivos_no_pdf("output")
 
@@ -123,11 +131,11 @@ def recopilar_informacion_redes_sociales(username: str):
     # informacion_social = obtener_informacion_redes_sociales('nombre de usuario')
 
     # Llamar a la función para borrar archivos no PDF en la carpeta "output/"
-    #borrar_archivos_no_pdf("output")
+    # borrar_archivos_no_pdf("output")
 
 
 def identificar_riesgos_redes_sociales(username: str):
-    datos_importantes=evaluacion.identificar_riesgos_username(username)
+    datos_importantes = evaluacion.identificar_riesgos_username(username)
     mejoras.generar_report_username(datos_importantes)
 
     # Llamar a la función para borrar archivos no PDF en la carpeta "output/"
@@ -137,13 +145,13 @@ def identificar_riesgos_redes_sociales(username: str):
 def borrar_archivos_no_pdf(directorio):
     # Obtener la lista de archivos en el directorio
     archivos = os.listdir(directorio)
-    
+
     # Iterar sobre los archivos y eliminar los que no sean PDF
     for archivo in archivos:
         if not archivo.lower().endswith(".pdf"):
             archivo_path = os.path.join(directorio, archivo)
             os.remove(archivo_path)
-            #print(f"Archivo eliminado: {archivo_path}")
+            # print(f"Archivo eliminado: {archivo_path}")
 
 
 def main():
@@ -184,8 +192,12 @@ def main():
         pyhunter_api_key = keys_manager.get_key("pyhunter")
         breachdirectory_api_key = keys_manager.get_key("breachdirectory")
         similar_web_api_key = keys_manager.get_key("similar-web")
-        if pyhunter_api_key and breachdirectory_api_key and similar_web_api_key:  # Utilizar la clave de API
-            recopilar_informacion_mail(mail, pyhunter_api_key, breachdirectory_api_key,similar_web_api_key)
+        if (
+            pyhunter_api_key and breachdirectory_api_key and similar_web_api_key
+        ):  # Utilizar la clave de API
+            recopilar_informacion_mail(
+                mail, pyhunter_api_key, breachdirectory_api_key, similar_web_api_key
+            )
         else:
             print(
                 "La clave de PyHunter o BreachDirectory o Similar-Web no se encuentra en el archivo de claves de API."
@@ -193,8 +205,9 @@ def main():
     if domain:
         print("1. Realizar la recopilación de información")
         pyhunter_api_key = keys_manager.get_key("pyhunter")
+        similar_web_api_key = keys_manager.get_key("similar-web")
         if pyhunter_api_key:  # Utilizar la clave de API
-            recopilar_informacion_dominio(domain, pyhunter_api_key)
+            recopilar_informacion_dominio(domain, pyhunter_api_key, similar_web_api_key)
         else:
             print(
                 "La clave de PyHunter no se encuentra en el archivo de claves de API."
