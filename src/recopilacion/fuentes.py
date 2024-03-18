@@ -85,7 +85,7 @@ def obtener_informacion_theHarvester(domain: str):
         comando = (
             "python src\\theHarvester\\theHarvester.py -d "
             + domain
-            + " -s -v -n -b all -f output\\'"
+            + " -s -v -n -b all -f output\\"
             + domain
             + ".json"
         )
