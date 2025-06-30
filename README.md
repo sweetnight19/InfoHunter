@@ -1,6 +1,6 @@
-# InfoHunter2 🕵️‍♂️
+# InfoHunter 🕵️‍♂️
 
-**InfoHunter2** is a modular Python OSINT (Open Source Intelligence) suite for collecting and analyzing information about users, emails, and domains. It generates professional reports (PDF, JSON, etc.) and supports both interactive and automated workflows.
+**InfoHunter** is a modular Python OSINT (Open Source Intelligence) suite for collecting and analyzing information about users, emails, and domains. It generates professional reports (PDF, JSON, etc.) and supports both interactive and automated workflows.
 
 ## 📑 Table of Contents
 
