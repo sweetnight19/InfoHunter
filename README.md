@@ -1,86 +1,112 @@
-<div align="center">
-   <img src="images/logo1.png" alt="Logo de InfoHunter">
-</div>
+# InfoHunter 🕵️‍♂️
 
-&nbsp;
+**InfoHunter** is a modular Python OSINT (Open Source Intelligence) suite for collecting and analyzing information about users, emails, and domains. It generates professional reports (PDF, JSON, etc.) and supports both interactive and automated workflows.
 
-# 🔎 InfoHunter
+## 📑 Table of Contents
 
-InfoHunter es una herramienta de código abierto para la recopilación de información en OSINT, diseñada para proteger la seguridad y privacidad de personas y empresas.
+- [Features](#-Features)
+- [Installation](#️-Installation)
+- [Quick Usage](#-Quick-Usage)
+- [Supported Modules & Data Sources](#-Supported-Modules--Data-Sources)
+- [Requirements](#-Requirements)
+- [Contributing](#-Contributing)
+- [License](#-License)
+- [Contact](#-Contact)
 
-![Licencia](https://img.shields.io/github/license/sweetnight19/InfoHunter)
-[![Estado del Proyecto](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow.svg)](https://github.com/sweetnight19/InfoHunter)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/sweetnight19/infohunter)
-![GitHub all releases](https://img.shields.io/github/downloads/Sweetnight19/InfoHunter/total)
-![GitHub Repo stars](https://img.shields.io/github/stars/sweetnight19/infohunter?style=plastic)
+## 🚀 Features
 
-&nbsp;
+- **Username analysis** across social networks (Sherlock, Maigret, etc.)
+- **Email leak and password checks** (HIBP, BreachDirectory, Holehe, IntelX, EmailRep, Snusbase, etc.)
+- **Public domain/company intelligence** (WHOIS, DNS, Shodan, Hunter.io, etc.)
+- **Automation-ready**: CLI parameters and bot/API integration
+- **Optional web frontend** (Flask/Streamlit)
 
-## 📚 Descripción del proyecto
+## 🛠️ Installation
 
-InfoHunter es una herramienta desarrollada en Python que utiliza técnicas de OSINT (Open Source Intelligence) para recopilar información relevante de diversas fuentes en línea. La herramienta se enfoca en identificar y analizar información para crear perfiles completos de las personas o empresas investigadas, así como para identificar posibles riesgos de seguridad o privacidad. Además, proporciona medidas y buenas prácticas para proteger la privacidad y seguridad de los sujetos de interés.
-
-## 🚀 Funcionalidades principales
-
-- Recopilación de información de fuentes en línea.
-- Análisis de la información para crear perfiles completos.
-- Identificación y evaluación de riesgos de seguridad o privacidad.
-- Medidas y buenas prácticas para proteger la privacidad y seguridad.
-- Evaluación de la eficacia de las medidas implementadas.
-
-## 🔧 Instalación
-
-1. Clona el repositorio de GitHub:
-
-   ```bash
+1. **Clone the repository:**
    git clone https://github.com/sweetnight19/InfoHunter.git
+   cd InfoHunter
 
-   ```
+2. **(Recommended) Create and activate a virtual environment:**
+   python -m venv venv
 
-2. Instala las dependencias:
+On Windows
+venv\Scripts\activate
 
-   ```bash
+On Linux/Mac
+source venv/bin/activate
+
+3. **Install requirements:**
    pip install -r requirements.txt
-   ```
 
-## 📖 Uso
+4. **Configure your API keys** (for more data sources):
 
-1. Ejecuta el archivo InfoHunter.py:
+- Create a `.env` file in the root folder:
+  ```
+  HIBP_API_KEY=your_key
+  BREACHDIRECTORY_API_KEY=your_key
+  INTELX_KEY=your_key
+  SHODAN_API_KEY=your_key
+  VT_API_KEY=your_key
+  HUNTER_API_KEY=your_key
+  ```
 
-   ```bash
-   python InfoHunter.py
+## ⚡ Quick Usage
 
-   ```
+### Interactive mode
 
-2. Sigue las instrucciones en la interfaz de línea de comandos para utilizar las funcionalidades de InfoHunter.
+```
+python main.py
+```
 
-## 🗺️ Roadmap
+### Username Analysis
 
-A continuación se muestra el plan de desarrollo para el proyecto:
+```
+python main.py -u username
+```
 
-- [x] Implementación de la búsqueda de información en fuentes abiertas.
-- [x] Análisis de datos recopilados para crear perfiles de personas y empresas.
-- [x] Identificación de posibles riesgos de seguridad y privacidad.
-- [x] Establecimiento de medidas para proteger la privacidad y seguridad.
-- [x] Evaluación de la eficacia de las medidas implementadas.
+### Email Analysis
 
-## 👤 Autor
+```
+python main.py -e user@example.com
+```
 
-- David Marquet
-- Email: david-marquet@hotmail.com
-- GitHub: [@sweetnight19](https://github.com/sweetnight19)
-- Twitter: [@DavidMarquet19](https://twitter.com/DavidMarquet19)
-- Linkedin: [David Marquet](https://www.linkedin.com/in/davidmarquetvall/)
+### Domain Analysis
 
-## 🤝 Contribuciones
+```
+python main.py -d example.com
+```
 
-Las contribuciones son bienvenidas. Si deseas contribuir a este proyecto, sigue los siguientes pasos:
+### Automated/CLI mode
 
-1. Haz un fork del repositorio.
-2. Crea una nueva rama para tu contribución.
-3. Realiza tus modificaciones y mejoras.
-4. Envía un pull request.
+python main.py -e user@example.com
+python main.py -d example.com
+python main.py -u username
 
-## 📜 Licencia
+## 📦 Supported Modules & Data Sources
 
-Este proyecto está licenciado bajo la [Licencia GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html).
+- **Usernames:** Sherlock, Maigret, Holehe, SocialScan
+- **Emails:** HIBP, BreachDirectory, Holehe, IntelX, EmailRep, Snusbase, Gravatar
+- **Domains:** WHOIS, DNS, Shodan, Hunter.io, TheHarvester, VirusTotal
+
+## ❗ Requirements
+
+- Python 3.8+
+- Internet access for external sources
+- Some sources require API keys (see `.env`)
+
+## 💡 Contributing
+
+Pull requests and suggestions are welcome!  
+Open an issue to discuss major changes or feature requests.
+
+## 🛡️ License
+
+MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+## 📬 Contact
+
+- Twitter: [@SweetNight19](https://twitter.com/SweetNight19)
+- Email: sweetnight19@protonmail.com
