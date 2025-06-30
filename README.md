@@ -25,7 +25,6 @@
 
 1. **Clone the repository:**
    git clone https://github.com/sweetnight19/InfoHunter.git
-   cd InfoHunter
 
 2. **(Recommended) Create and activate a virtual environment:**
    python -m venv venv
