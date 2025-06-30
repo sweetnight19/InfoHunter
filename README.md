@@ -78,9 +78,9 @@ python main.py -d example.com
 
 ### Automated/CLI mode
 
-python main.py -e user@example.com
-python main.py -d example.com
-python main.py -u username
+- python main.py -e user@example.com
+- python main.py -d example.com
+- python main.py -u username
 
 ## 📦 Supported Modules & Data Sources
 
