@@ -545,6 +545,8 @@ def generate_osint_pdf_domain(
     title = "OSINT Domain Analysis Report"
     header_text = "InfoHunter"
     date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    copyright_text = "© 2025 InfoHunter | OSINT Project"
+    logo_url = "https://img.icons8.com/ios-filled/100/1F4E79/hacker.png"
 
     c = canvas.Canvas(pdf_filename, pagesize=letter)
 
@@ -555,6 +557,113 @@ def generate_osint_pdf_domain(
         c.setFont("Helvetica", 9)
         c.setFillColor(HexColor("#666666"))
         c.drawCentredString(page_width / 2, 0.5 * inch, f"Page {page_num_local}")
+        c.setFont("Helvetica-Oblique", 8)
+        c.setFillColor(HexColor("#888888"))
+        c.drawString(inch / 2, 0.5 * inch, copyright_text)
+
+    def add_separator():
+        nonlocal y
+        c.setStrokeColor(HexColor("#1F4E79"))
+        c.setLineWidth(1)
+        c.line(inch, y, page_width - inch, y)
+        y -= 32
+
+    def add_table(data, col_names, col_widths=None):
+        nonlocal y
+
+        if not data:
+            return
+        check_page_space(len(data) + 2, 20)
+        table_data = [col_names] + data
+        if not col_widths:
+            col_widths = [100] * len(col_names)
+        t = Table(table_data, colWidths=col_widths)
+        t.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1F4E79")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 9),
+                    ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
+                    ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#F2F4F4")),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#BFC9CA")),
+                ]
+            )
+        )
+        t.wrapOn(c, page_width - 2 * inch, y)
+        t.drawOn(c, inch, y - (len(data) + 1) * 18)
+        y -= (len(data) + 1) * 18 + 10
+
+    # --- Portada ---
+    c.setFillColor(HexColor("#1F4E79"))
+    c.rect(0, 0, page_width, page_height, fill=1, stroke=0)
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 32)
+    c.drawCentredString(page_width / 2, page_height - 2 * inch, "InfoHunter")
+    c.setFont("Helvetica", 18)
+    c.drawCentredString(page_width / 2, page_height - 2.7 * inch, title)
+    c.setFont("Helvetica", 12)
+    c.drawCentredString(page_width / 2, page_height - 3.3 * inch, f"Domain: {domain}")
+    c.setFont("Helvetica-Oblique", 10)
+    c.drawCentredString(page_width / 2, page_height - 3.7 * inch, f"Date: {date_str}")
+    # Logo (opcional, solo si tienes PIL y requests)
+    try:
+        import requests
+        from io import BytesIO
+        from PIL import Image
+
+        response = requests.get(logo_url)
+        img = Image.open(BytesIO(response.content))
+        img_path = os.path.join(output_dir, "_logo_temp.png")
+        img.save(img_path)
+        c.drawImage(
+            img_path,
+            page_width / 2 - 30,
+            page_height - 1.3 * inch,
+            width=60,
+            height=60,
+            mask="auto",
+        )
+        os.remove(img_path)
+    except Exception:
+        pass
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica", 12)
+    c.drawCentredString(page_width / 2, inch, "© 2025 InfoHunter | OSINT Project")
+    c.showPage()
+    page_num += 1
+    y = page_height - margin_top
+    add_header_footer(page_num)
+
+    # --- Índice ---
+    c.setFont("Helvetica-Bold", 16)
+    c.setFillColor(HexColor("#1F4E79"))
+    c.drawString(inch, y, "Table of Contents")
+    y -= 24
+    toc = [
+        "Executive Summary",
+        "WHOIS",
+        "DNS Records",
+        "Sublist3r Subdomains",
+        "crt.sh Subdomains",
+        "Hunter.io Emails",
+        "theHarvester Results",
+        "Wayback Machine Snapshots",
+        "Shodan Results",
+        "VirusTotal Results",
+        "Recommendations",
+    ]
+    c.setFont("Helvetica", 12)
+    c.setFillColor(HexColor("#000000"))
+    for i, section in enumerate(toc, 1):
+        c.drawString(inch + 10, y, f"{i}. {section}")
+        y -= 16
+    c.showPage()
+    page_num += 1
+    y = page_height - margin_top
+    add_header_footer(page_num)
 
     def check_page_space(lines_needed=1, extra_space=0):
         nonlocal y, page_num
@@ -568,10 +677,11 @@ def generate_osint_pdf_domain(
     def add_section_title(text):
         nonlocal y, page_num
         check_page_space(2)
+        add_separator()
         c.setFont("Helvetica-Bold", 15)
         c.setFillColor(HexColor("#0B5394"))
         c.drawString(inch, y, text)
-        y -= line_height
+        y -= line_height * 2
 
     def add_text(text, color=HexColor("#000000")):
         nonlocal y, page_num
@@ -680,7 +790,174 @@ def generate_osint_pdf_domain(
 
     # Executive Summary
     add_executive_summary()
-    y -= line_height
+
+    # Añadir más espacio
+    y -= line_height * 2
+
+    # --- Tabla de alertas/resumen de riesgos ---
+    def get_risk_alerts():
+        alerts = []
+        # VirusTotal
+        vt = virustotal_results.get("data", {})
+        rep = vt.get("attributes", {}).get("reputation", 0)
+        if isinstance(rep, int) and rep < 0:
+            alerts.append(
+                [
+                    "Reputación negativa en VirusTotal",
+                    f"{rep}",
+                    f"https://www.virustotal.com/gui/domain/{domain}",
+                ]
+            )
+        # Shodan puertos abiertos
+        ports = shodan_results.get("ports", [])
+        if ports:
+            alerts.append(
+                [
+                    "Puertos abiertos detectados (Shodan)",
+                    ", ".join(str(p) for p in ports),
+                    f"https://www.shodan.io/search?query={domain}",
+                ]
+            )
+        # Subdominios expuestos
+        if sublist3r_results and len(sublist3r_results) > 10:
+            alerts.append(
+                [
+                    "Muchos subdominios expuestos (Sublist3r)",
+                    str(len(sublist3r_results)),
+                    "",
+                ]
+            )
+        if crtsh_results and len(crtsh_results) > 10:
+            alerts.append(
+                [
+                    "Muchos subdominios expuestos (crt.sh)",
+                    str(len(crtsh_results)),
+                    f"https://crt.sh/?q=%25.{domain}",
+                ]
+            )
+        # Emails públicos
+        if hunter_results.get("emails"):
+            alerts.append(
+                [
+                    "Emails públicos encontrados (Hunter.io)",
+                    str(len(hunter_results["emails"])),
+                    "",
+                ]
+            )
+        # theHarvester subdominios
+        if (
+            theharvester_results.get("subdomains")
+            and len(theharvester_results["subdomains"]) > 10
+        ):
+            alerts.append(
+                [
+                    "theHarvester: muchos subdominios",
+                    str(len(theharvester_results["subdomains"])),
+                    "",
+                ]
+            )
+        # VirusTotal categorías
+        cats = vt.get("attributes", {}).get("categories", {})
+        if cats:
+            for engine, cat in cats.items():
+                if cat.lower() in ("malicious", "phishing", "suspicious"):
+                    alerts.append(
+                        [
+                            f"Categoría VT: {cat}",
+                            engine,
+                            f"https://www.virustotal.com/gui/domain/{domain}",
+                        ]
+                    )
+        return alerts
+
+    alerts = get_risk_alerts()
+    if alerts:
+        add_section_title("\u26a0\ufe0f Alertas y puntos críticos")
+        add_table(alerts, ["Alerta", "Detalle", "Fuente"], [200, 120, 150])
+
+    # Añadir más espacio
+    y -= line_height * 2
+
+    # --- Visualización simple: distribución de subdominios por TLD ---
+    def plot_subdomain_tld_chart(subdomains):
+        from collections import Counter
+        import matplotlib.pyplot as plt
+        import io
+
+        tlds = [s.split(".")[-1] for s in subdomains if "." in s]
+        if not tlds:
+            return None
+        counter = Counter(tlds)
+        labels, values = zip(*counter.most_common(6))
+        fig, ax = plt.subplots(figsize=(4, 2))
+        ax.bar(labels, values, color="#1F4E79")
+        ax.set_title("Subdominios por TLD")
+        buf = io.BytesIO()
+        plt.tight_layout()
+        plt.savefig(buf, format="png")
+        plt.close(fig)
+        buf.seek(0)
+        return buf
+
+    # Insertar gráfico de subdominios por TLD (si hay subdominios)
+    if sublist3r_results and len(sublist3r_results) > 3:
+        try:
+            buf = plot_subdomain_tld_chart(sublist3r_results)
+            if buf:
+                check_page_space(8, 60)
+                c.drawImage(buf, inch, y - 60, width=220, height=60)
+
+                # Añadir más espacio
+                y -= line_height * 2
+        except Exception:
+            pass
+
+    # --- Visualización simple: línea de tiempo de snapshots de Wayback ---
+    def plot_wayback_timeline(snapshots):
+        import matplotlib.pyplot as plt
+        import io
+        from datetime import datetime
+
+        if not snapshots:
+            return None
+        # Extraer años de los snapshots
+        years = []
+        for snap in snapshots:
+            try:
+                if isinstance(snap, str) and len(snap) >= 4:
+                    year = int(snap[:4])
+                    years.append(year)
+            except Exception:
+                continue
+        if not years:
+            return None
+        from collections import Counter
+
+        counter = Counter(years)
+        labels, values = zip(*sorted(counter.items()))
+        fig, ax = plt.subplots(figsize=(4, 2))
+        ax.plot(labels, values, marker="o", color="#D35400")
+        ax.set_title("Snapshots Wayback por año")
+        ax.set_xlabel("Año")
+        ax.set_ylabel("Capturas")
+        buf = io.BytesIO()
+        plt.tight_layout()
+        plt.savefig(buf, format="png")
+        plt.close(fig)
+        buf.seek(0)
+        return buf
+
+    if wayback_results and len(wayback_results) > 3:
+        try:
+            buf = plot_wayback_timeline(wayback_results)
+            if buf:
+                check_page_space(8, 60)
+                c.drawImage(buf, inch + 250, y - 60, width=220, height=60)
+
+                # Añadir más espacio
+                y -= line_height * 2
+        except Exception:
+            pass
 
     # WHOIS
     def format_whois_date(date):
@@ -700,19 +977,27 @@ def generate_osint_pdf_domain(
         if whois_results.get("error"):
             add_text(f"Error: {whois_results['error']}", color=HexColor("#FF0000"))
         else:
-            add_text(f"Registrar: {whois_results.get('registrar', 'N/A')}")
-
+            whois_table = []
+            whois_table.append(["Registrar", whois_results.get("registrar", "N/A")])
             creation = whois_results.get("creation_date", "N/A")
             if isinstance(creation, list) and creation:
                 creation = creation[0]
-            add_text(f"Creation Date: {format_whois_date(creation)}")
-            add_text(
-                f"Expiration Date: {format_whois_date(whois_results.get('expiration_date', 'N/A'))}"
+            whois_table.append(["Creation Date", format_whois_date(creation)])
+            whois_table.append(
+                [
+                    "Expiration Date",
+                    format_whois_date(whois_results.get("expiration_date", "N/A")),
+                ]
             )
-            add_text(f"Name Servers: {whois_results.get('name_servers', 'N/A')}")
+            ns = whois_results.get("name_servers", "N/A")
+            if isinstance(ns, list):
+                ns = ", ".join(ns)
+            whois_table.append(["Name Servers", ns])
+            add_table(whois_table, ["Field", "Value"], [120, 350])
     except Exception:
         add_text("Error retrieving WHOIS data.", color=HexColor("#FF0000"))
-    y -= line_height
+    # Añadir más espacio
+    y -= line_height * 2
 
     # DNS
     add_section_title("DNS Records")
@@ -720,16 +1005,18 @@ def generate_osint_pdf_domain(
         if dns_results.get("error"):
             add_text(f"Error: {dns_results['error']}", color=HexColor("#FF0000"))
         else:
+            dns_table = []
             for rtype in ["A", "MX", "NS"]:
                 records = dns_results.get(rtype, [])
                 if records:
                     for rec in records:
-                        add_text(f"{rtype}: {rec}")
+                        dns_table.append([rtype, rec])
                 else:
-                    add_text(f"{rtype}: None")
+                    dns_table.append([rtype, "None"])
+            add_table(dns_table, ["Type", "Value"], [60, 410])
     except Exception:
         add_text("Error retrieving DNS data.", color=HexColor("#FF0000"))
-    y -= line_height
+    y -= line_height * 2
 
     # Sublist3r
     add_section_title("Sublist3r Subdomains")
@@ -737,13 +1024,20 @@ def generate_osint_pdf_domain(
         if isinstance(sublist3r_results, dict) and sublist3r_results.get("error"):
             add_text(f"Error: {sublist3r_results['error']}", color=HexColor("#FF0000"))
         elif sublist3r_results:
-            for sub in sublist3r_results:
-                add_text(f"- {sub}")
+            max_show = 20
+            subdomains = sublist3r_results[:max_show]
+            sub_table = [[s] for s in subdomains]
+            add_table(sub_table, ["Subdomain"], [470])
+            if len(sublist3r_results) > max_show:
+                add_text(
+                    f"...and {len(sublist3r_results)-max_show} more.",
+                    color=HexColor("#888888"),
+                )
         else:
             add_text("No subdomains found.", color=HexColor("#FF0000"))
     except Exception:
         add_text("Error retrieving Sublist3r data.", color=HexColor("#FF0000"))
-    y -= line_height
+    y -= line_height * 2
 
     # crt.sh
     add_section_title("crt.sh Subdomains")
@@ -751,13 +1045,20 @@ def generate_osint_pdf_domain(
         if isinstance(crtsh_results, dict) and crtsh_results.get("error"):
             add_text(f"Error: {crtsh_results['error']}", color=HexColor("#FF0000"))
         elif crtsh_results:
-            for sub in crtsh_results:
-                add_text(f"- {sub}")
+            max_show = 20
+            crtsh = crtsh_results[:max_show]
+            crtsh_table = [[s] for s in crtsh]
+            add_table(crtsh_table, ["Subdomain"], [470])
+            if len(crtsh_results) > max_show:
+                add_text(
+                    f"...and {len(crtsh_results)-max_show} more.",
+                    color=HexColor("#888888"),
+                )
         else:
             add_text("No subdomains found.", color=HexColor("#FF0000"))
     except Exception:
         add_text("Error retrieving crt.sh data.", color=HexColor("#FF0000"))
-    y -= line_height
+    y -= line_height * 2
 
     # Hunter.io (tabulado y sin solapamiento)
     add_section_title("Hunter.io Emails")
@@ -800,7 +1101,7 @@ def generate_osint_pdf_domain(
             add_text("No emails found.", color=HexColor("#FF0000"))
     except Exception as e:
         add_text(f"Error retrieving Hunter.io data: {e}", color=HexColor("#FF0000"))
-    y -= line_height
+    y -= line_height * 2
 
     # theHarvester (tabulado y sin solapamiento)
     add_section_title("theHarvester Results")
@@ -862,8 +1163,8 @@ def generate_osint_pdf_domain(
 
     except Exception as e:
         add_text(f"Error retrieving theHarvester data: {e}", color=HexColor("#FF0000"))
-        y -= line_height
-    y -= line_height
+        y -= line_height * 2
+    y -= line_height * 2
 
     # Wayback Machine
     add_section_title("Wayback Machine Snapshots")
@@ -880,7 +1181,7 @@ def generate_osint_pdf_domain(
             add_text("No snapshots found.", color=HexColor("#FF0000"))
     except Exception:
         add_text("Error retrieving Wayback Machine data.", color=HexColor("#FF0000"))
-    y -= line_height
+    y -= line_height * 2
 
     # Shodan (tabulado y sin solapamiento)
     add_section_title("Shodan Results")
@@ -916,7 +1217,7 @@ def generate_osint_pdf_domain(
             add_text("No Shodan data.", color=HexColor("#FF0000"))
     except Exception as e:
         add_text(f"Error retrieving Shodan data: {e}", color=HexColor("#FF0000"))
-    y -= line_height
+    y -= line_height * 2
 
     # VirusTotal (tabulado y bonito)
     add_section_title("VirusTotal Results")
@@ -983,7 +1284,7 @@ def generate_osint_pdf_domain(
             add_text("No VirusTotal data.", color=HexColor("#FF0000"))
     except Exception as e:
         add_text(f"Error retrieving VirusTotal data: {e}", color=HexColor("#FF0000"))
-    y -= line_height
+    y -= line_height * 2
 
     # Recommendations
     add_recommendations()

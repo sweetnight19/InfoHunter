@@ -109,3 +109,30 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 - Twitter: [@SweetNight19](https://twitter.com/SweetNight19)
 - Email: sweetnight19@protonmail.com
+
+## 🌐 Web Frontend (Streamlit)
+
+InfoHunter includes a modern, visual frontend built with Streamlit to make OSINT analysis and report management easy and user-friendly.
+
+### What does the frontend offer?
+
+- **Interactive OSINT analysis**: Tab to analyze domains, emails, or usernames and display results in a clear, formatted way.
+- **.env editor**: Edit your API keys and configuration directly from the interface, without leaving your browser.
+- **PDF report management**: Download and delete generated reports easily. Includes a button to instantly refresh the report list.
+
+### How to use it?
+
+1. Launch the frontend:
+   ```
+   streamlit run app.py
+   ```
+2. Open the local URL provided by Streamlit (default: http://localhost:8501).
+3. Navigate between the tabs:
+   - **OSINT Analysis**: Select the type of analysis, enter the value, and click "Search". Results are shown in a user-friendly format.
+   - **Edit .env**: Modify and save your API key configuration file.
+   - **Generated Reports**: Download or delete PDFs. Use the "Refresh report list" button to see changes instantly.
+
+### Requirements
+
+- Make sure your `.env` file is configured and dependencies are installed.
+- Python 3.8+ and Streamlit installed (`pip install streamlit`).
