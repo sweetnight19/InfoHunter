@@ -52,7 +52,7 @@ jedi==0.19.2
 Jinja2==3.1.6
 jsonpickle==4.1.1
 lxml==5.4.0
-maigret @ https://github.com/soxoj/maigret/archive/refs/heads/main.zip#sha256=fc431d55ec481e2599141dc5ab3c6dd58bca7b41c7ac1672b384512b14fdb031
+maigret==0.1.0
 MarkupSafe==3.0.2
 matplotlib-inline==0.1.7
 mock==5.2.0
