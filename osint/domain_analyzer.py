@@ -276,7 +276,7 @@ def get_wayback_snapshots(domain):
 
 
 # --- Main analysis function ---
-def analyze(domain):
+def analyze(domain, selected_sources=None, progress_callback=None):
     """
     Performs a full OSINT analysis on the domain and returns a results dictionary.
     """
@@ -291,7 +291,7 @@ def analyze(domain):
         "wayback": lambda: get_wayback_snapshots(domain),
         "shodan": lambda: shodan_scan(domain),
         "virustotal": lambda: vt_domain_report(domain),
-    }, max_workers=4)
+    }, max_workers=4, selected_sources=selected_sources, on_source_done=progress_callback)
     print(f"{MAGENTA}{BOLD}=== Domain Analysis Complete ==={RESET}")
 
     # Clean up any temporary files created by theHarvester
