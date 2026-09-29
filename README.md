@@ -84,6 +84,15 @@ Keep Python packages imported by InfoHunter in `requirements.txt`. When adding o
 
 Tools that InfoHunter runs as separate commands belong in the optional-tools setup above, not in `requirements.txt`. Install the tool separately, call its executable from the analyzer, handle a missing executable and timeout, and add or update tests for its command arguments and output parsing. This keeps optional tools isolated from InfoHunter's Python environment.
 
+## Project structure
+
+- `app.py` starts Streamlit; `dashboard.py` renders its analysis, configuration, and report views.
+- `osint/config.py` is the single provider-key lookup and status surface.
+- `osint/results.py` defines the normalized `SourceResult` contract; `osint/concurrency.py` applies it to source execution.
+- Domain, email, and username analyzers support structured results for the dashboard and keep legacy payloads for existing CLI/report callers.
+- `osint/pdf_common.py` contains shared PDF layout helpers. The username, email, and domain renderers live in separate modules; `osint/report_generator.py` remains the compatibility import surface.
+- `tests/` contains offline unit tests. External providers and CLIs are mocked so the suite does not make network requests.
+
 ## CLI usage
 
 Run the interactive menu:
