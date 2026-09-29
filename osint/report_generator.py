@@ -6,26 +6,20 @@ from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from datetime import datetime
 from pathlib import Path
-import hashlib
 import os
-import re
+import uuid
 
 col_widths = [90, 40, 40, 70, 70, 60, 100]
 
 
 def _report_path(output_dir, subject):
+    del subject
     base_dir = Path(output_dir) if output_dir else Path("reports")
     if not base_dir.is_absolute():
         base_dir = Path(__file__).resolve().parent.parent / base_dir
     base_dir = base_dir.resolve()
     base_dir.mkdir(parents=True, exist_ok=True)
-
-    subject = str(subject)
-    safe_stem = re.sub(r"[^A-Za-z0-9._-]+", "_", subject).strip("._-")[:80]
-    safe_stem = safe_stem or "report"
-    digest = hashlib.sha256(subject.encode("utf-8", errors="replace")).hexdigest()[:10]
-    return base_dir / f"{safe_stem}-{digest}.pdf"
-
+    return base_dir / f"infohunter-{uuid.uuid4().hex}.pdf"
 
 def generate_osint_pdf_username(
     username, sherlock_results, maigret_results, output_dir="reports"
