@@ -272,9 +272,10 @@ def analyze_intelx(email):
 
 # ---------- Combined Analysis ----------
 def analyze(email, selected_sources=None, progress_callback=None, structured=False):
-    """
-    Performs a combined OSINT analysis using HIBP, BreachDirectory, Holehe, and Intelligence X.
-    Returns a dictionary with all results.
+    """Analyze selected sources for this email.
+
+    Set structured=True to receive SourceResult objects. The default preserves
+    the legacy payload shape used by the CLI and report generators.
     """
     print(f"\n{BOLD}{MAGENTA}[START] OSINT email analysis for: {email}{RESET}")
     results = run_sources({
