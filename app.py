@@ -1,7 +1,6 @@
 from pathlib import Path
 from datetime import datetime
 import os
-import shutil
 import time
 
 import streamlit as st
@@ -10,6 +9,7 @@ from dotenv import find_dotenv, load_dotenv
 from osint import domain_analyzer, email_analyzer, report_generator, username_analyzer
 from osint.input_validation import validate_target
 from osint.result_status import source_status
+from osint.tool_status import harvester_key_file_status, optional_tool_status
 
 
 load_dotenv(find_dotenv())
@@ -46,6 +46,14 @@ ANALYZERS = {
     "Dominio": domain_analyzer.analyze,
     "Email": email_analyzer.analyze,
     "Usuario": username_analyzer.analyze,
+}
+SOURCE_OPTIONS = {
+    "Dominio": [
+        "whois", "dns", "subdomains_sublist3r", "subdomains_crtsh",
+        "hunter", "theharvester", "wayback", "shodan", "virustotal",
+    ],
+    "Email": ["hibp", "breachdirectory", "holehe", "intelx"],
+    "Usuario": ["sherlock_profiles", "maigret_profiles"],
 }
 
 
@@ -93,6 +101,13 @@ with tab_analysis:
                 placeholder="example.com, persona@example.com o username",
                 key="analysis_target",
             )
+        selected_sources = st.multiselect(
+            "Fuentes",
+            options=SOURCE_OPTIONS[kind],
+            default=SOURCE_OPTIONS[kind],
+            key=f"analysis_sources_{kind}",
+            help="Solo se consultarán las fuentes seleccionadas.",
+        )
         submitted = st.form_submit_button("🔍 Analizar", type="primary")
 
     if submitted:
@@ -103,26 +118,42 @@ with tab_analysis:
             st.session_state.pop("analysis_result", None)
             st.session_state.pop("generated_pdf", None)
         else:
-            try:
-                started_at = datetime.now().astimezone()
-                started_clock = time.perf_counter()
-                with st.spinner("Consultando las fuentes configuradas…"):
-                    result = ANALYZERS[kind](normalized_target)
-                st.session_state["analysis_result"] = {
-                    "kind": kind,
-                    "target": normalized_target,
-                    "result": result,
-                    "started_at": started_at.isoformat(timespec="seconds"),
-                    "duration_seconds": round(time.perf_counter() - started_clock, 1),
-                }
-                st.session_state.pop("generated_pdf", None)
-            except Exception as error:
+            if not selected_sources:
+                st.warning("Selecciona al menos una fuente.")
                 st.session_state.pop("analysis_result", None)
                 st.session_state.pop("generated_pdf", None)
-                st.error(
-                    f"El análisis falló ({type(error).__name__}). "
-                    "Revisa la configuración de fuentes y la salida del terminal."
-                )
+            else:
+                try:
+                    started_at = datetime.now().astimezone()
+                    started_clock = time.perf_counter()
+                    with st.status("Consultando las fuentes seleccionadas…", expanded=True) as progress:
+                        def on_source_done(source, value):
+                            state = source_status(value)
+                            icon = "✅" if state.startswith("Completado") else "⚠️"
+                            progress.write(f"{icon} **{source}** — {state}")
+
+                        result = ANALYZERS[kind](
+                            normalized_target,
+                            selected_sources=selected_sources,
+                            progress_callback=on_source_done,
+                        )
+                        progress.update(label="Análisis finalizado", state="complete")
+                    st.session_state["analysis_result"] = {
+                        "kind": kind,
+                        "target": normalized_target,
+                        "selected_sources": list(selected_sources),
+                        "result": result,
+                        "started_at": started_at.isoformat(timespec="seconds"),
+                        "duration_seconds": round(time.perf_counter() - started_clock, 1),
+                    }
+                    st.session_state.pop("generated_pdf", None)
+                except Exception as error:
+                    st.session_state.pop("analysis_result", None)
+                    st.session_state.pop("generated_pdf", None)
+                    st.error(
+                        f"El análisis falló ({type(error).__name__}). "
+                        "Revisa la configuración de fuentes y la salida del terminal."
+                    )
 
     saved = st.session_state.get("analysis_result")
     try:
@@ -133,6 +164,7 @@ with tab_analysis:
         saved is not None
         and saved.get("kind") == kind
         and saved.get("target") == normalized_target
+        and set(saved.get("selected_sources", SOURCE_OPTIONS[kind])) == set(selected_sources)
     )
 
     if matches_current_input:
@@ -212,32 +244,25 @@ with tab_config:
         "seguirán ejecutándose. Reinicia la app después de cambiar el archivo .env."
     )
     st.markdown("#### Herramientas opcionales")
-    tool_commands = {
-        "Sherlock": "sherlock",
-        "Maigret": "maigret",
-        "Holehe": "holehe",
-        "theHarvester": "theHarvester",
-    }
-    for tool_name, command in tool_commands.items():
-        installed = shutil.which(command) is not None
+    for tool_name, installed in optional_tool_status().items():
         st.write(
             f"{'✅' if installed else '○'} **{tool_name}** — "
             f"{'disponible en PATH' if installed else 'no encontrado en PATH'}"
         )
 
-    harvester_key_files = [
-        Path.home() / ".theHarvester" / "api-keys.yaml",
-        Path("/etc/theHarvester/api-keys.yaml"),
-        Path("/usr/local/etc/theHarvester/api-keys.yaml"),
-    ]
-    key_file = next((path for path in harvester_key_files if path.is_file()), None)
-    if key_file:
-        st.write("✅ **theHarvester API keys** — archivo de configuración encontrado")
-    else:
-        st.write("○ **theHarvester API keys** — archivo api-keys.yaml no encontrado")
+    key_status = harvester_key_file_status()
+    key_labels = {
+        "valid": ("✅", "YAML válido"),
+        "missing": ("○", "archivo api-keys.yaml no encontrado"),
+        "invalid_yaml": ("⚠️", "YAML con sintaxis inválida"),
+        "invalid_structure": ("⚠️", "estructura YAML inesperada"),
+        "unreadable": ("⚠️", "archivo no legible"),
+    }
+    key_icon, key_label = key_labels.get(key_status, ("⚠️", "estado desconocido"))
+    st.write(f"{key_icon} **theHarvester API keys** — {key_label}")
     st.caption(
-        "Solo se comprueba si existe el archivo; InfoHunter no lee ni muestra su contenido. "
-        "Las claves de theHarvester no se obtienen del .env de InfoHunter."
+        "Se comprueba localmente la estructura YAML, sin mostrar valores de claves. "
+        "theHarvester obtiene sus claves de api-keys.yaml, no del .env de InfoHunter."
     )
 
 
