@@ -80,10 +80,28 @@ def analyze_with_maigret(username):
 
 
 def analyze(username, selected_sources=None, progress_callback=None, structured=False):
-    """Analyze selected sources for this username.
+    """Analyze selected username sources.
 
-    Set structured=True to receive SourceResult objects. The default preserves
-    the legacy payload shape used by the CLI and report generators.
+    Structured mode returns SourceResult objects. The default preserves the
+    legacy payload shape used by the CLI and report generators.
+    """
+    print(f"\n🚀 Starting OSINT username analysis for: {username}")
+    results = run_sources(
+        {
+            "sherlock_profiles": lambda: analyze_with_sherlock(username),
+            "maigret_profiles": lambda: analyze_with_maigret(username),
+        },
+        max_workers=2,
+        selected_sources=selected_sources,
+        on_source_done=progress_callback,
+        structured=structured,
+    )
+    print(f"🏁 Analysis finished for: {username}\n")
+    results["username"] = username
+    return results
+
+
+def print_username_results(results):
     """Nicely print the results of the username analysis."""
     print(f"\n🔎 Results for '{results['username']}':\n")
     print("Sherlock found:")
