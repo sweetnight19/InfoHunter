@@ -118,7 +118,10 @@ with tab_analysis:
                 )
 
     saved = st.session_state.get("analysis_result")
-    normalized_target = target.strip()
+    try:
+        normalized_target = validate_target(kind, target)
+    except ValueError:
+        normalized_target = target.strip()
     matches_current_input = (
         saved is not None
         and saved.get("kind") == kind
