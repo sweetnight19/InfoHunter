@@ -366,18 +366,13 @@ def generate_osint_pdf_email(
                     y = page_height - inch
                 source = leak.get("source", "Unknown")
                 has_password = leak.get("has_password", False)
-                password = leak.get("password", "") or ""
-                sha1 = leak.get("sha1", "") or ""
                 add_text(f"- Source: {source}", y, color=HexColor("#2874A6"))
                 y -= line_height
                 if has_password:
-                    add_text(f"  Password (partial/obfuscated): {password}", y)
-                    y -= line_height
-                    add_text(f"  SHA1: {sha1}", y)
-                    y -= line_height
+                    add_text("  Source reports exposed credential data; values are omitted.", y)
                 else:
-                    add_text("  No password leaked.", y)
-                    y -= line_height
+                    add_text("  No password data reported by this source.", y)
+                y -= line_height
         else:
             add_text("No leaks found.", y, color=HexColor("#FF0000"))
             y -= line_height
