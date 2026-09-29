@@ -61,7 +61,7 @@ class SourceResult:
         return cls(
             source=source,
             state=SourceState.ERROR,
-            value={"error": message},
+            data={"error": message},
             message=message,
         )
 
@@ -78,16 +78,16 @@ class SourceResult:
             SourceState.EMPTY,
         }:
             return False
-        if isinstance(self.value, dict):
-            if "found" in self.value:
-                return bool(self.value["found"])
+        if isinstance(self.data, dict):
+            if "found" in self.data:
+                return bool(self.data["found"])
             return any(
-                bool(value) for key, value in self.value.items()
+                bool(value) for key, value in self.data.items()
                 if key not in {"error", "email", "username", "domain", "raw"}
             )
-        if isinstance(self.value, (list, tuple, set)):
+        if isinstance(self.data, (list, tuple, set)):
             return any(
                 not str(item).casefold().startswith("error running")
-                for item in self.value
+                for item in self.data
             )
-        return bool(self.value)
+        return bool(self.data)
