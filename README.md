@@ -50,6 +50,8 @@ Verify that the commands are available with `sherlock --version`, `maigret --ver
 
 Install [theHarvester](https://github.com/laramies/theHarvester/wiki/Installation) separately and follow its current official instructions. Its current release requires Python 3.14, while InfoHunter itself supports Python 3.11+, so avoid installing it into InfoHunter's virtual environment. The official instructions also describe Kali packages and source installation.
 
+Some theHarvester sources need provider credentials in its own `api-keys.yaml`; InfoHunter's `.env` keys are not forwarded to it. On first run, theHarvester creates a template under `~/.theHarvester/`. Edit `~/.theHarvester/api-keys.yaml`, fill only the providers you plan to use, and restrict access to the file (for example, `chmod 600 ~/.theHarvester/api-keys.yaml`). Keep real keys out of the repository. See the official [API-key configuration guide](https://github.com/laramies/theHarvester/blob/master/docs/wiki/Configuration-and-API-Keys.md) for provider fields and alternate config locations.
+
 See the official projects for [Sherlock](https://github.com/sherlock-project/sherlock), [Maigret](https://github.com/soxoj/maigret), and [Holehe](https://github.com/megadose/holehe) for platform-specific options and troubleshooting.
 
 ### Adding dependencies to InfoHunter
