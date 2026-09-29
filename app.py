@@ -5,6 +5,8 @@ import streamlit as st
 from dotenv import find_dotenv, load_dotenv
 
 from osint import domain_analyzer, email_analyzer, report_generator, username_analyzer
+from osint.input_validation import validate_target
+from osint.result_status import source_status
 
 
 load_dotenv(find_dotenv())
@@ -91,9 +93,10 @@ with tab_analysis:
         submitted = st.form_submit_button("🔍 Analizar", type="primary")
 
     if submitted:
-        normalized_target = target.strip()
-        if not normalized_target:
-            st.warning("Introduce un valor para analizar.")
+        try:
+            normalized_target = validate_target(kind, target)
+        except ValueError as error:
+            st.warning(str(error))
             st.session_state.pop("analysis_result", None)
             st.session_state.pop("generated_pdf", None)
         else:
@@ -115,7 +118,10 @@ with tab_analysis:
                 )
 
     saved = st.session_state.get("analysis_result")
-    normalized_target = target.strip()
+    try:
+        normalized_target = validate_target(kind, target)
+    except ValueError:
+        normalized_target = target.strip()
     matches_current_input = (
         saved is not None
         and saved.get("kind") == kind
@@ -124,7 +130,17 @@ with tab_analysis:
 
     if matches_current_input:
         st.markdown("### Resultado")
-        st.json(saved["result"], expanded=False)
+        result = saved["result"]
+        rows = [
+            {"Fuente": source, "Estado": source_status(value)}
+            for source, value in result.items()
+            if source not in {"email", "username", "domain"}
+        ]
+        st.dataframe(rows, hide_index=True, use_container_width=True)
+        for source, value in result.items():
+            if source not in {"email", "username", "domain"}:
+                with st.expander(f"Detalles: {source}"):
+                    st.json(value, expanded=False)
         if st.button("Crear informe PDF local", key="create_pdf"):
             try:
                 pdf_path = _create_pdf(kind, normalized_target, saved["result"])

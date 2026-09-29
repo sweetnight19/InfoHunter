@@ -38,7 +38,7 @@ cp .env.example .env
 
 On Windows, use `Copy-Item .env.example .env`. Keep `.env` private and never commit it.
 
-The username, email, and domain analyzers also call external command-line tools such as Sherlock, Maigret, Holehe, and theHarvester. These tools are optional and are not installed by `requirements.txt`; install the ones you need separately and ensure their commands are available on your `PATH`.
+The username, email, and domain analyzers also call external command-line tools. These tools are optional and are not installed by `requirements.txt`; install only the ones you need and ensure their commands are available on your `PATH`. For isolated installations, use `pipx` where the project supports it. Consult the official installation instructions for [Sherlock](https://github.com/sherlock-project/sherlock), [Maigret](https://github.com/soxoj/maigret), [Holehe](https://github.com/megadose/holehe), and [theHarvester](https://github.com/laramies/theHarvester/wiki/Installation). Their Python requirements differ, so do not install all tools into InfoHunter's virtual environment by default.
 
 ## CLI usage
 
