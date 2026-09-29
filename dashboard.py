@@ -210,7 +210,7 @@ def render_analysis_tab() -> None:
 
         if st.button("Crear informe PDF local", key="create_pdf"):
             try:
-                pdf_path = _create_pdf(kind, normalized_target, result)
+                legacy_result = {\n                    source: value.to_legacy() if isinstance(value, SourceResult) else value\n                    for source, value in result.items()\n                }\n                pdf_path = _create_pdf(kind, normalized_target, legacy_result)
                 st.session_state["generated_pdf"] = {
                     "analysis_key": (kind, normalized_target),
                     "path": pdf_path,
