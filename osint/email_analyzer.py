@@ -3,6 +3,7 @@ import glob
 import os
 import requests
 import subprocess
+import tempfile
 
 # ANSI color codes for colored output
 RESET = "\033[0m"
@@ -130,10 +131,7 @@ def parse_breachdirectory_response(email, response_json):
             has_password = entry.get("has_password", False)
         leak_info = {
             "source": entry.get("sources", "Unknown"),
-            "has_password": has_password,
-            "password": entry.get("password", None),
-            "sha1": entry.get("sha1", None),
-            "hash": entry.get("hash", None),
+            "has_password": bool(has_password),
         }
         leaks.append(leak_info)
 
@@ -154,39 +152,50 @@ def parse_breachdirectory_response(email, response_json):
 # ---------- Holehe ----------
 #
 def analyze_holehe(email):
-    """
-    Runs Holehe CLI to check the presence of the email in online services.
-    """
+    """Run Holehe in an isolated temporary directory and parse its CSV output."""
     print(f"\n{CYAN}[INFO] [Holehe] Checking services for {email}...{RESET}")
-    # Ejecuta Holehe con CSV y solo servicios donde existe el email
-    subprocess.run(
-        ["holehe", "--csv", "--only-used", email],
-        capture_output=True,
-        text=True,
-    )
-    print(f"{GREEN}[SUCCESS] [Holehe] Finished.{RESET}")
-
-    # Busca el archivo CSV generado (nombre dinámico)
-    pattern = f"holehe_*_{email}_results.csv"
-    matching_files = glob.glob(pattern)
-    if not matching_files:
-        print(f"{YELLOW}[WARNING] [Holehe] CSV output file not found.{RESET}")
-        return []
-
-    csv_file = matching_files[0]  # Toma el primero (debería ser único)
     domains = []
+
     try:
-        with open(csv_file, newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                domain = row.get("domain") or row.get("Domain")
-                if domain:
-                    domains.append(domain.strip())
-    finally:
-        try:
-            os.remove(csv_file)
-        except Exception as e:
-            print(f"{YELLOW}[WARNING] [Holehe] Could not delete CSV: {e}{RESET}")
+        with tempfile.TemporaryDirectory(prefix="infohunter-holehe-") as temp_dir:
+            process = subprocess.run(
+                ["holehe", "--csv", "--only-used", email],
+                capture_output=True,
+                text=True,
+                timeout=120,
+                cwd=temp_dir,
+                check=False,
+            )
+            if process.returncode != 0:
+                detail = (process.stderr or process.stdout or "").strip()
+                print(
+                    f"{YELLOW}[WARNING] [Holehe] Command exited with "
+                    f"status {process.returncode}: {detail[:300]}{RESET}"
+                )
+
+            pattern = os.path.join(
+                temp_dir, f"holehe_*_{glob.escape(email)}_results.csv"
+            )
+            matching_files = glob.glob(pattern)
+            if not matching_files:
+                print(f"{YELLOW}[WARNING] [Holehe] CSV output file not found.{RESET}")
+                return []
+
+            csv_file = max(matching_files, key=os.path.getmtime)
+            with open(csv_file, newline="", encoding="utf-8") as handle:
+                reader = csv.DictReader(handle)
+                for row in reader:
+                    domain = row.get("domain") or row.get("Domain")
+                    if domain:
+                        domains.append(domain.strip())
+
+    except subprocess.TimeoutExpired:
+        print(f"{YELLOW}[WARNING] [Holehe] Search timed out after 120 seconds.{RESET}")
+    except FileNotFoundError:
+        print(f"{YELLOW}[WARNING] [Holehe] CLI is not installed or not on PATH.{RESET}")
+    except OSError as error:
+        print(f"{YELLOW}[WARNING] [Holehe] Could not read temporary output: {error}{RESET}")
+
     return domains
 
 
@@ -306,11 +315,10 @@ def print_email_results(results):
         print(f"{GREEN}  Leaks found: {bd.get('total_leaks', len(bd['leaks']))}{RESET}")
         for leak in bd["leaks"]:
             print(f"   - Source: {leak['source']}")
-            if leak["has_password"]:
-                print(f"     Password (partial/obfuscated): {leak['password']}")
-                print(f"     SHA1: {leak['sha1']}")
+            if leak.get("has_password"):
+                print("     Credential data was present in the source; values are not collected or displayed.")
             else:
-                print("     No password leaked.")
+                print("     No password data reported by this source.")
     else:
         print(f"{YELLOW}  No leaks found.{RESET}")
 
