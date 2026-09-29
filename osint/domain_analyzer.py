@@ -8,6 +8,8 @@ import whois
 import dns.resolver
 from shodan import Shodan
 import sublist3r
+
+from osint.concurrency import run_sources
 from pyhunter import PyHunter
 
 # ANSI color codes for colored output
@@ -279,16 +281,17 @@ def analyze(domain):
     Performs a full OSINT analysis on the domain and returns a results dictionary.
     """
     print(f"{MAGENTA}{BOLD}=== Starting OSINT Domain Analysis for {domain} ==={RESET}")
-    results = {}
-    results["whois"] = get_whois(domain)
-    results["dns"] = get_dns(domain)
-    results["subdomains_sublist3r"] = get_subdomains_sublist3r(domain)
-    results["subdomains_crtsh"] = get_crtsh_subdomains(domain)
-    results["hunter"] = hunter_domain_search(domain)
-    results["theharvester"] = theharvester_search(domain)
-    results["wayback"] = get_wayback_snapshots(domain)
-    results["shodan"] = shodan_scan(domain)
-    results["virustotal"] = vt_domain_report(domain)
+    results = run_sources({
+        "whois": lambda: get_whois(domain),
+        "dns": lambda: get_dns(domain),
+        "subdomains_sublist3r": lambda: get_subdomains_sublist3r(domain),
+        "subdomains_crtsh": lambda: get_crtsh_subdomains(domain),
+        "hunter": lambda: hunter_domain_search(domain),
+        "theharvester": lambda: theharvester_search(domain),
+        "wayback": lambda: get_wayback_snapshots(domain),
+        "shodan": lambda: shodan_scan(domain),
+        "virustotal": lambda: vt_domain_report(domain),
+    }, max_workers=4)
     print(f"{MAGENTA}{BOLD}=== Domain Analysis Complete ==={RESET}")
 
     # Clean up any temporary files created by theHarvester
