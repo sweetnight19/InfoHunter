@@ -22,7 +22,7 @@ MENU = """
 What type of analysis do you want to perform? 🤔
 
 1️⃣  Analyze username on social networks
-2️⃣  Search for leaks and passwords by email
+2️⃣  Check email breach exposure
 3️⃣  Collect public information about a domain/company
 4️⃣  Exit
 
