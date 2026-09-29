@@ -1,6 +1,4 @@
 import subprocess
-import sys
-import os
 
 
 def analyze_with_sherlock(username):
@@ -12,7 +10,7 @@ def analyze_with_sherlock(username):
     found_urls = []
     try:
         process = subprocess.run(
-            [sys.executable, "-m", "sherlock_project", username, "--print-found"],
+            ["sherlock", username, "--print-found"],
             capture_output=True,
             text=True,
             timeout=120,
