@@ -1,8 +1,19 @@
 """Bounded concurrent execution for independent analysis sources."""
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import replace
+from time import perf_counter
 
 from osint.results import SourceResult
+
+
+def _execute_source(name, call):
+    started_at = perf_counter()
+    try:
+        result = SourceResult.from_value(name, call())
+    except Exception as error:
+        result = SourceResult.from_exception(name, error)
+    return replace(result, duration_seconds=round(perf_counter() - started_at, 3))
 
 
 def run_sources(
@@ -15,7 +26,7 @@ def run_sources(
     """Run named sources and optionally return stable SourceResult envelopes.
 
     Legacy callers keep receiving their original payloads. Structured callers get
-    consistent state, message, and findings metadata for every source.
+    consistent state, message, findings, and timing metadata for every source.
     """
     if selected_sources is not None:
         selected = set(selected_sources)
@@ -26,11 +37,14 @@ def run_sources(
     results = {}
     worker_count = max(1, min(max_workers, len(tasks)))
     with ThreadPoolExecutor(max_workers=worker_count) as executor:
-        futures = {executor.submit(call): name for name, call in tasks.items()}
+        futures = {
+            executor.submit(_execute_source, name, call): name
+            for name, call in tasks.items()
+        }
         for future in as_completed(futures):
             name = futures[future]
             try:
-                source_result = SourceResult.from_value(name, future.result())
+                source_result = future.result()
             except Exception as error:
                 source_result = SourceResult.from_exception(name, error)
 
