@@ -201,6 +201,8 @@ with tab_reports:
         )
         if not pdfs:
             st.info("Todavía no hay informes PDF.")
+        else:
+            st.warning("Revisa los informes antiguos: versiones previas podían incluir datos de credenciales en claro.")
         for pdf_path in pdfs:
             with st.container(border=True):
                 col_name, col_download, col_delete = st.columns([4, 1, 1])
