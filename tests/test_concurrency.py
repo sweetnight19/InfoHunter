@@ -1,6 +1,7 @@
 import unittest
 
 from osint.concurrency import run_sources
+from osint.results import SourceResult, SourceState
 
 
 class RunSourcesTests(unittest.TestCase):
@@ -23,3 +24,13 @@ class RunSourcesTests(unittest.TestCase):
         )
         self.assertEqual(results, {"two": 2})
         self.assertEqual(completed, [("two", 2)])
+
+    def test_structured_mode_returns_source_result_envelopes(self):
+        results = run_sources(
+            {"ok": lambda: ["https://example.test/profile"]},
+            structured=True,
+        )
+        self.assertIsInstance(results["ok"], SourceResult)
+        self.assertEqual(results["ok"].source, "ok")
+        self.assertEqual(results["ok"].state, SourceState.SUCCESS)
+        self.assertEqual(results["ok"].to_legacy(), ["https://example.test/profile"])
