@@ -39,7 +39,7 @@ def analyze_with_maigret(username):
     found_urls = []
     try:
         cmd = ["maigret", "-a", username]
-        process = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        process = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
         output = process.stdout
         print("[DEBUG] Maigret raw output:\n", output)  # Para depuración
         for line in output.splitlines():

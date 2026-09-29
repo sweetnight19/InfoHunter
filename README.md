@@ -1,138 +1,83 @@
-# InfoHunter 🕵️‍♂️
+# InfoHunter 🕵️
 
-**InfoHunter** is a modular Python OSINT (Open Source Intelligence) suite for collecting and analyzing information about users, emails, and domains. It generates professional reports (PDF, JSON, etc.) and supports both interactive and automated workflows.
+InfoHunter is a Python OSINT toolkit for analyzing public information about usernames, email addresses, and domains. It provides a command-line interface and a local Streamlit dashboard, and can create PDF reports.
 
-## 📑 Table of Contents
+Use it only for investigations you are authorized to perform. Findings from third-party sources may be incomplete or incorrect and should be independently verified.
 
-- [Features](#-Features)
-- [Installation](#️-Installation)
-- [Quick Usage](#-Quick-Usage)
-- [Supported Modules & Data Sources](#-Supported-Modules--Data-Sources)
-- [Requirements](#-Requirements)
-- [Contributing](#-Contributing)
-- [License](#-License)
-- [Contact](#-Contact)
+## Features
 
-## 🚀 Features
+- Search usernames with Sherlock and Maigret.
+- Check email addresses against breach and account-discovery services.
+- Collect public domain information such as DNS, WHOIS, subdomains, and provider data.
+- Run analyses from the CLI or local web dashboard.
+- Generate and download PDF reports.
 
-- **Username analysis** across social networks (Sherlock, Maigret, etc.)
-- **Email leak and password checks** (HIBP, BreachDirectory, Holehe, IntelX, EmailRep, Snusbase, etc.)
-- **Public domain/company intelligence** (WHOIS, DNS, Shodan, Hunter.io, etc.)
-- **Automation-ready**: CLI parameters and bot/API integration
-- **Optional web frontend** (Flask/Streamlit)
+Some providers require API keys. Sources without configured keys report their own status while other sources can continue.
 
-## 🛠️ Installation
+## Requirements and setup
 
-1. **Clone the repository:**
-   git clone https://github.com/sweetnight19/InfoHunter.git
+InfoHunter requires Python 3.9 or later. Install the Python dependencies from the repository root:
 
-2. **(Recommended) Create and activate a virtual environment:**
-   python -m venv venv
-
-On Windows
-venv\Scripts\activate
-
-On Linux/Mac
-source venv/bin/activate
-
-3. **Install requirements:**
-   pip install -r requirements.txt
-
-4. **Configure your API keys** (for more data sources):
-
-- Create a `.env` file in the root folder:
-  ```
-  HIBP_API_KEY=your_key
-  BREACHDIRECTORY_API_KEY=your_key
-  INTELX_KEY=your_key
-  SHODAN_API_KEY=your_key
-  VT_API_KEY=your_key
-  HUNTER_API_KEY=your_key
-  ```
-
-## ⚡ Quick Usage
-
-### Interactive mode
-
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
+
+On Windows, activate the environment with:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Create a local `.env` file from the example and add only the API keys for services you plan to use:
+
+```bash
+cp .env.example .env
+```
+
+On Windows, use `Copy-Item .env.example .env`. Keep `.env` private and never commit it.
+
+The username, email, and domain analyzers also call external command-line tools such as Sherlock, Maigret, Holehe, and theHarvester. These tools are optional and are not installed by `requirements.txt`; install the ones you need separately and ensure their commands are available on your `PATH`.
+
+## CLI usage
+
+Run the interactive menu:
+
+```bash
 python main.py
 ```
 
-### Username Analysis
+Or start an analysis directly:
 
-```
-python main.py -u username
-```
-
-### Email Analysis
-
-```
-python main.py -e user@example.com
+```bash
+python main.py --username johndoe
+python main.py --email user@example.com
+python main.py --domain example.com
 ```
 
-### Domain Analysis
+Use one analysis option per command. Each provider reports missing API keys or unavailable optional tools individually.
 
+## Local web dashboard
+
+Start the dashboard from the repository root:
+
+```bash
+streamlit run app.py
 ```
-python main.py -d example.com
-```
 
-### Automated/CLI mode
+The dashboard offers analysis, API-key configuration status, and local PDF management. It does not display or edit secret values. It has no authentication and is intended for localhost use; do not expose it to the Internet or shared networks.
 
-- python main.py -e user@example.com
-- python main.py -d example.com
-- python main.py -u username
+Analysis results remain in the current Streamlit session. PDF reports are stored in the project’s `reports/` directory. Filenames use random identifiers instead of the analyzed email, username, or domain.
 
-## 📦 Supported Modules & Data Sources
+## Data and privacy
 
-- **Usernames:** Sherlock, Maigret, Holehe, SocialScan
-- **Emails:** HIBP, BreachDirectory, Holehe, IntelX, EmailRep, Snusbase, Gravatar
-- **Domains:** WHOIS, DNS, Shodan, Hunter.io, TheHarvester, VirusTotal
+InfoHunter sends search terms to the providers and tools selected by each analyzer. Review those services’ policies before use. Results can contain sensitive personal information; protect generated reports and delete them when they are no longer needed. Breach checks report exposure indicators without storing or displaying recovered password values.
 
-## ❗ Requirements
+## Contributing
 
-- Python 3.8+
-- Internet access for external sources
-- Some sources require API keys (see `.env`)
+Pull requests and bug reports are welcome. For a new source integration, document its external tool or API key requirements and handle unavailable sources without blocking unrelated checks.
 
-## 💡 Contributing
+## License
 
-Pull requests and suggestions are welcome!  
-Open an issue to discuss major changes or feature requests.
-
-## 🛡️ License
-
-MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-## 📬 Contact
-
-- Twitter: [@SweetNight19](https://twitter.com/SweetNight19)
-- Email: sweetnight19@protonmail.com
-
-## 🌐 Web Frontend (Streamlit)
-
-InfoHunter includes a modern, visual frontend built with Streamlit to make OSINT analysis and report management easy and user-friendly.
-
-### What does the frontend offer?
-
-- **Interactive OSINT analysis**: Tab to analyze domains, emails, or usernames and display results in a clear, formatted way.
-- **.env editor**: Edit your API keys and configuration directly from the interface, without leaving your browser.
-- **PDF report management**: Download and delete generated reports easily. Includes a button to instantly refresh the report list.
-
-### How to use it?
-
-1. Launch the frontend:
-   ```
-   streamlit run app.py
-   ```
-2. Open the local URL provided by Streamlit (default: http://localhost:8501).
-3. Navigate between the tabs:
-   - **OSINT Analysis**: Select the type of analysis, enter the value, and click "Search". Results are shown in a user-friendly format.
-   - **Edit .env**: Modify and save your API key configuration file.
-   - **Generated Reports**: Download or delete PDFs. Use the "Refresh report list" button to see changes instantly.
-
-### Requirements
-
-- Make sure your `.env` file is configured and dependencies are installed.
-- Python 3.8+ and Streamlit installed (`pip install streamlit`).
+MIT License. See [LICENSE](LICENSE).

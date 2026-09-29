@@ -2,6 +2,7 @@ import json
 import os
 import socket
 import subprocess
+import tempfile
 import requests
 import whois
 import dns.resolver
@@ -82,9 +83,9 @@ def get_crtsh_subdomains(domain):
     Retrieves subdomains from crt.sh certificate transparency logs.
     """
     print(f"{CYAN}[INFO] Querying crt.sh for {domain}...{RESET}")
-    url = f"https://crt.sh/?q=%25.{domain}&output=json"
+    url = "https://crt.sh/"
     try:
-        r = requests.get(url, timeout=15)
+        r = requests.get(url, params={"q": f"%.{domain}", "output": "json"}, timeout=15)
         if r.status_code == 200:
             data = r.json()
             subs = set()
@@ -140,64 +141,50 @@ def hunter_domain_search(domain):
 
 # --- theHarvester ---
 def theharvester_search(domain, sources="all", limit=100):
-    """
-    Runs theHarvester as a CLI subprocess and parses the JSON output.
-    Returns a dictionary with emails, hosts, subdomains, and raw output.
-    """
+    """Run theHarvester in a private temporary directory with a hard timeout."""
     try:
-        # theHarvester admite salida en JSON con -f <filename> -s json
-        output_file = f"theharvester_{domain}.json"
-        cmd = [
-            "theHarvester",
-            "-d",
-            domain,
-            "-b",
-            sources,
-            "-l",
-            str(limit),
-            "-f",
-            output_file,
-        ]
-        print(f"[INFO] Running theHarvester: {' '.join(cmd)}")
-        subprocess.run(cmd, check=True)
-        # Lee el JSON generado
-        with open(output_file, "r") as f:
-            data = json.load(f)
-        # Limpia el archivo si quieres
-        try:
-            os.remove(output_file)
-        except Exception:
-            pass
+        with tempfile.TemporaryDirectory(prefix="infohunter-harvester-") as temp_dir:
+            output_file = os.path.join(temp_dir, "results.json")
+            cmd = [
+                "theHarvester",
+                "-d", domain,
+                "-b", sources,
+                "-l", str(limit),
+                "-f", output_file,
+            ]
+            subprocess.run(
+                cmd,
+                check=True,
+                timeout=180,
+                cwd=temp_dir,
+                capture_output=True,
+                text=True,
+            )
+            with open(output_file, "r", encoding="utf-8") as handle:
+                data = json.load(handle)
 
-        emails = data.get("emails", [])
-        hosts = data.get("hosts", [])
-        subdomains = data.get("subdomains", [])
-        ips = data.get("ips", [])
-        asn = data.get("asn", [])
         return {
-            "emails": emails,
-            "hosts": hosts,
-            "subdomains": subdomains,
-            "ips": ips,
-            "asn": asn,
+            "emails": data.get("emails", []),
+            "hosts": data.get("hosts", []),
+            "subdomains": data.get("subdomains", []),
+            "ips": data.get("ips", []),
+            "asn": data.get("asn", []),
             "raw": data,
         }
-    except Exception as e:
-        print(f"[ERROR] theHarvester CLI failed: {e}")
-        return {"error": str(e)}
+    except subprocess.TimeoutExpired:
+        print("[ERROR] theHarvester exceeded its 180-second limit.")
+        return {"error": "theHarvester timed out after 180 seconds."}
+    except FileNotFoundError:
+        print("[ERROR] theHarvester is not installed or not on PATH.")
+        return {"error": "theHarvester is not installed or not on PATH."}
+    except Exception as error:
+        print(f"[ERROR] theHarvester failed ({type(error).__name__}).")
+        return {"error": f"theHarvester failed ({type(error).__name__})."}
 
 
 def theharvester_cleanup():
-    """
-    Cleans up any temporary files created by theHarvester.
-    """
-    try:
-        for file in os.listdir("."):
-            if file.startswith("theharvester_") and file.endswith(".xml"):
-                os.remove(file)
-                print(f"{GREEN}[SUCCESS] Cleaned up {file}.{RESET}")
-    except Exception as e:
-        print(f"{RED}[ERROR] Cleanup failed: {e}{RESET}")
+    """Kept for compatibility; output is isolated and cleaned in a temp directory."""
+    return None
 
 
 # --- Shodan (requires API key) ---
@@ -205,9 +192,9 @@ def shodan_dns_resolve(domain, api_key):
     """
     Resolves a domain to IP using Shodan's DNS resolve API endpoint.
     """
-    url = f"https://api.shodan.io/dns/resolve?hostnames={domain}&key={api_key}"
+    url = "https://api.shodan.io/dns/resolve"
     try:
-        response = requests.get(url)
+        response = requests.get(url, params={"hostnames": domain, "key": api_key}, timeout=20)
         response.raise_for_status()
         data = response.json()
         return data.get(domain, None)
@@ -254,7 +241,8 @@ def vt_domain_report(domain):
     url = f"https://www.virustotal.com/api/v3/domains/{domain}"
     headers = {"x-apikey": api_key}
     try:
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=headers, timeout=20)
+        r.raise_for_status()
         print(f"{GREEN}[SUCCESS] VirusTotal query complete.{RESET}")
         return r.json()
     except Exception as e:
@@ -268,9 +256,9 @@ def get_wayback_snapshots(domain):
     Retrieves historical snapshots from the Wayback Machine.
     """
     print(f"{CYAN}[INFO] Querying Wayback Machine for {domain}...{RESET}")
-    url = f"http://web.archive.org/cdx/search/cdx?url={domain}&output=json"
+    url = "https://web.archive.org/cdx/search/cdx"
     try:
-        r = requests.get(url)
+        r = requests.get(url, params={"url": domain, "output": "json"}, timeout=20)
         if r.status_code == 200:
             data = r.json()
             print(
@@ -303,6 +291,4 @@ def analyze(domain):
     print(f"{MAGENTA}{BOLD}=== Domain Analysis Complete ==={RESET}")
 
     # Clean up any temporary files created by theHarvester
-    theharvester_cleanup()
-
     return results
