@@ -1,3 +1,4 @@
+from osint.config import get_api_key
 from osint.concurrency import run_sources
 
 import csv
@@ -31,7 +32,7 @@ def analyze_hibp(email):
     Checks if the email appears in breaches using Have I Been Pwned (HIBP) API.
     """
     print(f"{CYAN}[INFO] [HIBP] Checking breaches for '{email}'...{RESET}")
-    hibp_api_key = os.getenv("HIBP_API_KEY")
+    hibp_api_key = get_api_key("HIBP_API_KEY")
     if not hibp_api_key:
         print(
             f"{RED}[ERROR] [HIBP] HIBP_API_KEY not set in environment variables.{RESET}"
@@ -70,7 +71,7 @@ def analyze_breachdirectory(email):
     Checks if the email appears in breaches using BreachDirectory via RapidAPI.
     """
     print(f"\n{CYAN}[INFO] [BreachDirectory] Checking breaches for '{email}'...{RESET}")
-    api_key = os.getenv("BREACHDIRECTORY_API_KEY")
+    api_key = get_api_key("BREACHDIRECTORY_API_KEY")
     if not api_key:
         print(
             f"{RED}[ERROR] [BreachDirectory] BREACHDIRECTORY_API_KEY not set in environment variables.{RESET}"
@@ -232,7 +233,7 @@ def analyze_intelx(email):
     Queries Intelligence X using the API key, returns results with previews for each record.
     """
     print(f"\n{CYAN}[INFO] [Intelligence X] Searching leaks for {email}...{RESET}")
-    api_key = os.getenv("INTELX_KEY")
+    api_key = get_api_key("INTELX_KEY")
     if not INTELX_AVAILABLE:
         print(f"{RED}[ERROR] [Intelligence X] intelxapi not installed.{RESET}")
         return {"error": "intelxapi not installed."}
@@ -270,7 +271,7 @@ def analyze_intelx(email):
 
 
 # ---------- Combined Analysis ----------
-def analyze(email, selected_sources=None, progress_callback=None):
+def analyze(email, selected_sources=None, progress_callback=None, structured=False):
     """
     Performs a combined OSINT analysis using HIBP, BreachDirectory, Holehe, and Intelligence X.
     Returns a dictionary with all results.
@@ -281,7 +282,7 @@ def analyze(email, selected_sources=None, progress_callback=None):
         "breachdirectory": lambda: analyze_breachdirectory(email),
         "holehe": lambda: analyze_holehe(email),
         "intelx": lambda: analyze_intelx(email),
-    }, max_workers=4, selected_sources=selected_sources, on_source_done=progress_callback)
+    }, max_workers=4, selected_sources=selected_sources, on_source_done=progress_callback, structured=structured)
     print(f"{BOLD}{MAGENTA}[END] Email analysis finished for: {email}{RESET}\n")
     results["email"] = email
     return results
