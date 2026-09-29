@@ -1,4 +1,6 @@
 """Domain PDF report renderer."""
+
+import os
 from osint.pdf_common import (
     HexColor, Table, TableStyle, canvas, colors, datetime, inch, letter,
     stringWidth, col_widths, _fit_pdf_line, _report_path,
