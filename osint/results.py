@@ -22,11 +22,12 @@ class SourceResult:
     state: SourceState
     value: Any
     message: str | None = None
+    duration_seconds: float | None = None
 
     @classmethod
     def from_value(cls, source: str, value: Any) -> "SourceResult":
         if isinstance(value, cls):
-            return cls(source, value.state, value.value, value.message)
+            return cls(source, value.state, value.value, value.message, value.duration_seconds)
 
         if isinstance(value, dict) and value.get("error"):
             message = str(value["error"])
