@@ -86,7 +86,7 @@ Tools that InfoHunter runs as separate commands belong in the optional-tools set
 
 ## Project structure
 
-- `app.py` starts Streamlit; `dashboard.py` renders its analysis, configuration, and report views.
+- `main.py` shares one validation/execution/report flow for interactive and argument-driven CLI use. `app.py` starts Streamlit; `dashboard.py` renders its analysis, configuration, and report views.
 - `osint/config.py` is the single provider-key lookup and status surface.
 - `osint/results.py` defines the normalized `SourceResult` contract; `osint/concurrency.py` applies it to source execution.
 - Domain, email, and username analyzers support structured results for the dashboard and keep legacy payloads for existing CLI/report callers.
