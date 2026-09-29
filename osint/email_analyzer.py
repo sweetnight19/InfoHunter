@@ -270,7 +270,7 @@ def analyze_intelx(email):
 
 
 # ---------- Combined Analysis ----------
-def analyze(email):
+def analyze(email, selected_sources=None, progress_callback=None):
     """
     Performs a combined OSINT analysis using HIBP, BreachDirectory, Holehe, and Intelligence X.
     Returns a dictionary with all results.
@@ -281,7 +281,7 @@ def analyze(email):
         "breachdirectory": lambda: analyze_breachdirectory(email),
         "holehe": lambda: analyze_holehe(email),
         "intelx": lambda: analyze_intelx(email),
-    }, max_workers=4)
+    }, max_workers=4, selected_sources=selected_sources, on_source_done=progress_callback)
     print(f"{BOLD}{MAGENTA}[END] Email analysis finished for: {email}{RESET}\n")
     results["email"] = email
     return results
