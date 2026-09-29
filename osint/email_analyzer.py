@@ -120,7 +120,7 @@ def parse_breachdirectory_response(email, response_json):
         )
         return {"error": "API call unsuccessful or malformed response.", "email": email}
 
-    found = response_json.get("found", 0)
+    raw_found = response_json.get("found", 0)
     results = response_json.get("result", [])
     leaks = []
 
@@ -129,8 +129,11 @@ def parse_breachdirectory_response(email, response_json):
         has_password = entry.get("hash_password")
         if has_password is None:
             has_password = entry.get("has_password", False)
+        source = entry.get("sources", "Unknown")
+        if isinstance(source, (list, tuple, set)):
+            source = ", ".join(str(item) for item in source if item)
         leak_info = {
-            "source": entry.get("sources", "Unknown"),
+            "source": str(source or "Unknown"),
             "has_password": bool(has_password),
         }
         leaks.append(leak_info)
@@ -140,12 +143,17 @@ def parse_breachdirectory_response(email, response_json):
         f"{YELLOW}[DEBUG] [BreachDirectory] Raw 'found': {found}, leaks parsed: {len(leaks)}{RESET}"
     )
 
+    try:
+        total_found = int(raw_found or 0)
+    except (TypeError, ValueError):
+        total_found = len(leaks)
+
     return {
-        "found": found > 0,
+        "found": total_found > 0,
         "email": email,
         "leaks": leaks,
-        "sources": list({leak["source"] for leak in leaks}),
-        "total_leaks": found,
+        "sources": sorted({leak["source"] for leak in leaks}),
+        "total_leaks": total_found,
     }
 
 
