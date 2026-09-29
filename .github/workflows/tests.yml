@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.12"]
+        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install test dependency
-        run: python -m pip install reportlab
+      - name: Install project dependencies
+        run: python -m pip install -r requirements.txt
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
