@@ -1,6 +1,6 @@
 """Application settings and secret lookup in one place."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os
 from typing import Mapping
 
@@ -19,7 +19,7 @@ API_KEYS = {
 class Settings:
     """Environment-backed settings; secret values are never included in repr."""
 
-    _api_keys: Mapping[str, str]
+    _api_keys: Mapping[str, str] = field(repr=False)
 
     @classmethod
     def from_environment(cls, environ=None) -> "Settings":
