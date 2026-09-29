@@ -1,5 +1,7 @@
 import subprocess
 
+from osint.concurrency import run_sources
+
 
 def analyze_with_sherlock(username):
     """
@@ -58,14 +60,12 @@ def analyze(username):
     Returns a dictionary with all found URLs.
     """
     print(f"\n🚀 Starting OSINT username analysis for: {username}")
-    sherlock_results = analyze_with_sherlock(username)
-    maigret_results = analyze_with_maigret(username)
+    results = run_sources({
+        "sherlock_profiles": lambda: analyze_with_sherlock(username),
+        "maigret_profiles": lambda: analyze_with_maigret(username),
+    }, max_workers=2)
     print(f"🏁 Analysis finished for: {username}\n")
-    results = {
-        "username": username,
-        "sherlock_profiles": sherlock_results,
-        "maigret_profiles": maigret_results,
-    }
+    results["username"] = username
     return results
 
 
