@@ -38,7 +38,19 @@ cp .env.example .env
 
 On Windows, use `Copy-Item .env.example .env`. Keep `.env` private and never commit it.
 
-The username, email, and domain analyzers also call external command-line tools. These tools are optional and are not installed by `requirements.txt`; install only the ones you need and ensure their commands are available on your `PATH`. For isolated installations, use `pipx` where the project supports it. Consult the official installation instructions for [Sherlock](https://github.com/sherlock-project/sherlock), [Maigret](https://github.com/soxoj/maigret), [Holehe](https://github.com/megadose/holehe), and [theHarvester](https://github.com/laramies/theHarvester/wiki/Installation). Their Python requirements differ, so do not install all tools into InfoHunter's virtual environment by default.
+The username, email, and domain analyzers call optional command-line tools. They are not installed by `requirements.txt`. Install only the tools you need, and make sure their commands are available on your `PATH`. Keeping them isolated with `pipx` avoids dependency conflicts with InfoHunter:
+
+```bash
+pipx install sherlock-project
+pipx install maigret
+pipx install holehe
+```
+
+Verify that the commands are available with `sherlock --version`, `maigret --version`, and `holehe --help`. InfoHunter invokes those commands directly, so the `pipx` executable directory must be on `PATH`.
+
+Install [theHarvester](https://github.com/laramies/theHarvester/wiki/Installation) separately and follow its current official instructions. Its current release requires Python 3.14, while InfoHunter itself supports Python 3.9+, so avoid installing it into InfoHunter's virtual environment. The official instructions also describe Kali packages and source installation.
+
+See the official projects for [Sherlock](https://github.com/sherlock-project/sherlock), [Maigret](https://github.com/soxoj/maigret), and [Holehe](https://github.com/megadose/holehe) for platform-specific options and troubleshooting.
 
 ## CLI usage
 
