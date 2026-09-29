@@ -132,7 +132,12 @@ def render_analysis_tab() -> None:
                         def on_source_done(source, value):
                             state = source_status(value)
                             icon = "✅" if state.startswith("Completado") else "⚠️"
-                            progress.write(f"{icon} **{source}** — {state}")
+                            elapsed = (
+                                f" · {value.duration_seconds:.1f} s"
+                                if isinstance(value, SourceResult) and value.duration_seconds is not None
+                                else ""
+                            )
+                            progress.write(f"{icon} **{source}** — {state}{elapsed}")
 
                         result = ANALYZERS[kind](
                             normalized_target,
@@ -182,7 +187,10 @@ def render_analysis_tab() -> None:
             status in {"Error", "Parcial", "Falta configuración", "Herramienta no instalada"}
             for status in statuses.values()
         )
-        found_count = sum(status == "Completado · con hallazgos" for status in statuses.values())
+        found_count = sum(
+            isinstance(value, SourceResult) and value.has_findings
+            for value in source_values.values()
+        )
 
         duration_col, sources_col, findings_col = st.columns(3)
         duration_col.metric("Duración", f'{saved.get("duration_seconds", 0):.1f} s')
