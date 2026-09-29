@@ -95,34 +95,18 @@ def analyze(username, selected_sources=None, progress_callback=None):
     results["username"] = username
     return results
 
-def analyze(username):
-    """
-    Combines Sherlock and Maigret results for the given username.
-    Returns a dictionary with all found URLs.
-    """
-    print(f"\n🚀 Starting OSINT username analysis for: {username}")
-    results = run_sources({
-        "sherlock_profiles": lambda: analyze_with_sherlock(username),
-        "maigret_profiles": lambda: analyze_with_maigret(username),
-    }, max_workers=2)
-    print(f"🏁 Analysis finished for: {username}\n")
-    results["username"] = username
-    return results
-
 
 def print_username_results(results):
-    """
-    Nicely prints the results of the username analysis.
-    """
+    """Nicely print the results of the username analysis."""
     print(f"\n🔎 Results for '{results['username']}':\n")
     print("Sherlock found:")
-    if results["sherlock_profiles"]:
+    if results.get("sherlock_profiles"):
         for url in results["sherlock_profiles"]:
             print("  -", url)
     else:
         print("  No profiles found.")
     print("Maigret found:")
-    if results["maigret_profiles"]:
+    if results.get("maigret_profiles"):
         for url in results["maigret_profiles"]:
             print("  -", url)
     else:
