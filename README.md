@@ -16,7 +16,7 @@ Some providers require API keys. Sources without configured keys report their ow
 
 ## Requirements and setup
 
-InfoHunter requires Python 3.9 or later. Install the Python dependencies from the repository root:
+InfoHunter requires Python 3.11 or later. The pinned NumPy dependency does not support Python 3.9 or 3.10. Install the Python dependencies from the repository root:
 
 ```bash
 python -m venv .venv
@@ -48,7 +48,7 @@ pipx install holehe
 
 Verify that the commands are available with `sherlock --version`, `maigret --version`, and `holehe --help`. InfoHunter invokes those commands directly, so the `pipx` executable directory must be on `PATH`.
 
-Install [theHarvester](https://github.com/laramies/theHarvester/wiki/Installation) separately and follow its current official instructions. Its current release requires Python 3.14, while InfoHunter itself supports Python 3.9+, so avoid installing it into InfoHunter's virtual environment. The official instructions also describe Kali packages and source installation.
+Install [theHarvester](https://github.com/laramies/theHarvester/wiki/Installation) separately and follow its current official instructions. Its current release requires Python 3.14, while InfoHunter itself supports Python 3.11+, so avoid installing it into InfoHunter's virtual environment. The official instructions also describe Kali packages and source installation.
 
 See the official projects for [Sherlock](https://github.com/sherlock-project/sherlock), [Maigret](https://github.com/soxoj/maigret), and [Holehe](https://github.com/megadose/holehe) for platform-specific options and troubleshooting.
 
