@@ -2,6 +2,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.colors import HexColor
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from datetime import datetime
@@ -10,6 +11,17 @@ import os
 import uuid
 
 col_widths = [90, 40, 40, 70, 70, 60, 100]
+
+
+def _fit_pdf_line(text, font, size, max_width):
+    """Clip a single PDF line with an ellipsis so it stays inside the page."""
+    value = str(text)
+    if stringWidth(value, font, size) <= max_width:
+        return value
+    suffix = "…"
+    while value and stringWidth(value + suffix, font, size) > max_width:
+        value = value[:-1]
+    return value + suffix if value else suffix
 
 
 def _report_path(output_dir, subject):
@@ -66,7 +78,7 @@ def generate_osint_pdf_username(
     def add_text(text, y_pos, color=HexColor("#000000")):
         c.setFont("Helvetica", 12)
         c.setFillColor(color)
-        c.drawString(inch + 10, y_pos, text)
+        c.drawString(inch + 10, y_pos, _fit_pdf_line(text, "Helvetica", 12, page_width - inch - (inch + 10)))
 
     def add_executive_summary(y_pos):
         # Executive summary following OSINT best practices[3][5]
@@ -687,7 +699,7 @@ def generate_osint_pdf_domain(
         check_page_space(1)
         c.setFont("Helvetica", 11)
         c.setFillColor(color)
-        c.drawString(inch + 10, y, text)
+        c.drawString(inch + 10, y, _fit_pdf_line(text, "Helvetica", 11, page_width - inch - (inch + 10)))
         y -= line_height
 
     def add_executive_summary():
