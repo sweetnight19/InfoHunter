@@ -5,9 +5,26 @@ from reportlab.lib.colors import HexColor
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from datetime import datetime
+from pathlib import Path
+import hashlib
 import os
+import re
 
 col_widths = [90, 40, 40, 70, 70, 60, 100]
+
+
+def _report_path(output_dir, subject):
+    base_dir = Path(output_dir) if output_dir else Path("reports")
+    if not base_dir.is_absolute():
+        base_dir = Path(__file__).resolve().parent.parent / base_dir
+    base_dir = base_dir.resolve()
+    base_dir.mkdir(parents=True, exist_ok=True)
+
+    subject = str(subject)
+    safe_stem = re.sub(r"[^A-Za-z0-9._-]+", "_", subject).strip("._-")[:80]
+    safe_stem = safe_stem or "report"
+    digest = hashlib.sha256(subject.encode("utf-8", errors="replace")).hexdigest()[:10]
+    return base_dir / f"{safe_stem}-{digest}.pdf"
 
 
 def generate_osint_pdf_username(
@@ -18,10 +35,7 @@ def generate_osint_pdf_username(
     Includes Sherlock and Maigret results, executive summary, and analyst recommendations.
     The PDF is saved as reports/<username>.pdf.
     """
-    # Ensure the reports directory exists
-    if output_dir and not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    pdf_filename = os.path.join(output_dir, f"{username}.pdf")
+    pdf_filename = str(_report_path(output_dir, username))
     page_width, page_height = letter
     title = "OSINT Username Analysis Report"
     header_text = "InfoHunter"
@@ -194,9 +208,7 @@ def generate_osint_pdf_email(
     Generate a colorful, structured PDF OSINT report for a given email.
     Handles missing or faulty data gracefully.
     """
-    if output_dir and not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    pdf_filename = os.path.join(output_dir, f"{email}.pdf")
+    pdf_filename = str(_report_path(output_dir, email))
     page_width, page_height = letter
     title = "OSINT Email Analysis Report"
     header_text = "InfoHunter"
@@ -533,9 +545,7 @@ def generate_osint_pdf_domain(
     virustotal_results,
     output_dir="reports",
 ):
-    if output_dir and not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    pdf_filename = os.path.join(output_dir, f"{domain}.pdf")
+    pdf_filename = str(_report_path(output_dir, domain))
     page_width, page_height = letter
     margin_top = inch
     margin_bottom = inch
