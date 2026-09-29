@@ -278,8 +278,10 @@ def get_wayback_snapshots(domain):
 
 # --- Main analysis function ---
 def analyze(domain, selected_sources=None, progress_callback=None, structured=False):
-    """
-    Performs a full OSINT analysis on the domain and returns a results dictionary.
+    """Analyze selected sources for this domain.
+
+    Set structured=True to receive SourceResult objects. The default preserves
+    the legacy payload shape used by the CLI and report generators.
     """
     print(f"{MAGENTA}{BOLD}=== Starting OSINT Domain Analysis for {domain} ==={RESET}")
     results = run_sources({
