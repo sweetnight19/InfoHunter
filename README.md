@@ -38,13 +38,37 @@ cp .env.example .env
 
 On Windows, use `Copy-Item .env.example .env`. Keep `.env` private and never commit it.
 
-The username, email, and domain analyzers call optional command-line tools. They are not installed by `requirements.txt`. Install only the tools you need, and make sure their commands are available on your `PATH`. Keeping them isolated with `pipx` avoids dependency conflicts with InfoHunter:
+The username, email, and domain analyzers call optional command-line tools. They are not installed by `requirements.txt`. Install only the tools you need, and make sure their commands are available on your `PATH`. Keeping them isolated with `pipx` avoids dependency conflicts with InfoHunter.
+
+Install pipx for your operating system:
+
+```bash
+# macOS (Homebrew)
+brew install pipx
+pipx ensurepath
+
+# Ubuntu/Debian Linux
+sudo apt update
+sudo apt install pipx
+pipx ensurepath
+```
+
+On Windows PowerShell:
+
+```powershell
+py -m pip install --user pipx
+py -m pipx ensurepath
+```
+
+Restart the terminal after `pipx ensurepath`, then install the optional tools you need:
 
 ```bash
 pipx install sherlock-project
 pipx install maigret
 pipx install holehe
 ```
+
+On Linux distributions other than Ubuntu/Debian, install pipx with the system package manager when available. See the [pipx installation guide](https://pipx.pypa.io/latest/how-to/install-pipx.html) for Fedora, Scoop, and other options.
 
 Verify that the commands are available with `sherlock --version`, `maigret --version`, and `holehe --help`. InfoHunter invokes those commands directly, so the `pipx` executable directory must be on `PATH`.
 
@@ -86,7 +110,7 @@ Start the dashboard from the repository root:
 streamlit run app.py
 ```
 
-The dashboard offers analysis, API-key configuration status, and local PDF management. It does not display or edit secret values. It has no authentication and is intended for localhost use; do not expose it to the Internet or shared networks.
+The dashboard lets you choose which sources to run, shows per-source progress and results, reports optional tool and configuration status, and manages local PDF reports. It does not display or edit secret values. It has no authentication and is intended for localhost use; do not expose it to the Internet or shared networks.
 
 Analysis results remain in the current Streamlit session. PDF reports are stored in the project’s `reports/` directory. Filenames use random identifiers instead of the analyzed email, username, or domain.
 
@@ -96,7 +120,7 @@ InfoHunter sends search terms to the providers and tools selected by each analyz
 
 ## Contributing
 
-Pull requests and bug reports are welcome. For a new source integration, document its external tool or API key requirements and handle unavailable sources without blocking unrelated checks.
+Pull requests and bug reports are welcome. For a new source integration, add its selection entry to the dashboard and analyzer, document its external tool or API key requirements, report progress and isolated failures, and test its structured output without network access.
 
 ## License
 
