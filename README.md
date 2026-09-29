@@ -1,10 +1,10 @@
-# InfoHunter 🕵️
+# InfoHunter 🕵️‍♂️
 
 InfoHunter is a Python OSINT toolkit for analyzing public information about usernames, email addresses, and domains. It provides a command-line interface and a local Streamlit dashboard, and can create PDF reports.
 
 Use it only for investigations you are authorized to perform. Findings from third-party sources may be incomplete or incorrect and should be independently verified.
 
-## Features
+## ✨ Features
 
 - Search usernames with Sherlock and Maigret.
 - Check email addresses against breach and account-discovery services.
@@ -14,7 +14,7 @@ Use it only for investigations you are authorized to perform. Findings from thir
 
 Some providers require API keys. Sources without configured keys report their own status while other sources can continue.
 
-## Requirements and setup
+## 🚀 Requirements and setup
 
 InfoHunter requires Python 3.11 or later. The pinned NumPy dependency does not support Python 3.9 or 3.10. Install the Python dependencies from the repository root:
 
@@ -78,13 +78,13 @@ Some theHarvester sources need provider credentials in its own `api-keys.yaml`; 
 
 See the official projects for [Sherlock](https://github.com/sherlock-project/sherlock), [Maigret](https://github.com/soxoj/maigret), and [Holehe](https://github.com/megadose/holehe) for platform-specific options and troubleshooting.
 
-### Adding dependencies to InfoHunter
+### 📦 Adding dependencies to InfoHunter
 
 Keep Python packages imported by InfoHunter in `requirements.txt`. When adding one, update that file, check that its supported Python versions match the version above, and keep the CI workflow installing the full requirements.
 
 Tools that InfoHunter runs as separate commands belong in the optional-tools setup above, not in `requirements.txt`. Install the tool separately, call its executable from the analyzer, handle a missing executable and timeout, and add or update tests for its command arguments and output parsing. This keeps optional tools isolated from InfoHunter's Python environment.
 
-## Project structure
+## 🗂️ Project structure
 
 - `main.py` shares one validation/execution/report flow for interactive and argument-driven CLI use. `app.py` starts Streamlit; `dashboard.py` renders its analysis, configuration, and report views.
 - `osint/config.py` is the single provider-key lookup and status surface.
@@ -93,7 +93,7 @@ Tools that InfoHunter runs as separate commands belong in the optional-tools set
 - `osint/pdf_common.py` contains shared PDF layout helpers. The username, email, and domain renderers live in separate modules; `osint/report_generator.py` remains the compatibility import surface.
 - `tests/` contains offline unit tests. External providers and CLIs are mocked so the suite does not make network requests.
 
-## CLI usage
+## 💻 CLI usage
 
 Run the interactive menu:
 
@@ -111,7 +111,7 @@ python main.py --domain example.com
 
 Use one analysis option per command. Each provider reports missing API keys or unavailable optional tools individually.
 
-## Local web dashboard
+## 🖥️ Local web dashboard
 
 Start the dashboard from the repository root:
 
@@ -123,14 +123,14 @@ The dashboard lets you choose which sources to run, shows per-source progress an
 
 Analysis results remain in the current Streamlit session. PDF reports are stored in the project’s `reports/` directory. Filenames use random identifiers instead of the analyzed email, username, or domain.
 
-## Data and privacy
+## 🔒 Data and privacy
 
 InfoHunter sends search terms to the providers and tools selected by each analyzer. Review those services’ policies before use. Results can contain sensitive personal information; protect generated reports and delete them when they are no longer needed. Breach checks report exposure indicators without storing or displaying recovered password values.
 
-## Contributing
+## 🤝 Contributing
 
 Pull requests and bug reports are welcome. For a new source integration, add its selection entry to the dashboard and analyzer, document its external tool or API key requirements, report progress and isolated failures, and test its structured output without network access.
 
-## License
+## 📄 License
 
 MIT License. See [LICENSE](LICENSE).
