@@ -72,7 +72,7 @@ Analysis results remain in the current Streamlit session. PDF reports are stored
 
 ## Data and privacy
 
-InfoHunter sends search terms to the providers and tools selected by each analyzer. Review those services’ policies before use. Results can contain sensitive personal information; protect generated reports and delete them when they are no longer needed. Breach checks report exposure indicators without collecting or displaying recovered password values.
+InfoHunter sends search terms to the providers and tools selected by each analyzer. Review those services’ policies before use. Results can contain sensitive personal information; protect generated reports and delete them when they are no longer needed. Breach checks report exposure indicators without storing or displaying recovered password values.
 
 ## Contributing
 
