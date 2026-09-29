@@ -242,6 +242,7 @@ def vt_domain_report(domain):
     headers = {"x-apikey": api_key}
     try:
         r = requests.get(url, headers=headers, timeout=20)
+        r.raise_for_status()
         print(f"{GREEN}[SUCCESS] VirusTotal query complete.{RESET}")
         return r.json()
     except Exception as e:
