@@ -144,13 +144,14 @@ def theharvester_search(domain, sources="all", limit=100):
     """Run theHarvester in a private temporary directory with a hard timeout."""
     try:
         with tempfile.TemporaryDirectory(prefix="infohunter-harvester-") as temp_dir:
-            output_file = os.path.join(temp_dir, "results.json")
+            output_prefix = os.path.join(temp_dir, "results")
+            output_file = output_prefix + ".json"
             cmd = [
                 "theHarvester",
                 "-d", domain,
                 "-b", sources,
                 "-l", str(limit),
-                "-f", output_file,
+                "-f", output_prefix,
             ]
             subprocess.run(
                 cmd,
