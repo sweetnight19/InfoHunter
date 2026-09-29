@@ -52,6 +52,12 @@ Install [theHarvester](https://github.com/laramies/theHarvester/wiki/Installatio
 
 See the official projects for [Sherlock](https://github.com/sherlock-project/sherlock), [Maigret](https://github.com/soxoj/maigret), and [Holehe](https://github.com/megadose/holehe) for platform-specific options and troubleshooting.
 
+### Adding dependencies to InfoHunter
+
+Keep Python packages imported by InfoHunter in `requirements.txt`. When adding one, update that file, check that its supported Python versions match the version above, and keep the CI workflow installing the full requirements.
+
+Tools that InfoHunter runs as separate commands belong in the optional-tools setup above, not in `requirements.txt`. Install the tool separately, call its executable from the analyzer, handle a missing executable and timeout, and add or update tests for its command arguments and output parsing. This keeps optional tools isolated from InfoHunter's Python environment.
+
 ## CLI usage
 
 Run the interactive menu:
