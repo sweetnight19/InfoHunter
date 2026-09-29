@@ -2,11 +2,12 @@
 
 from datetime import datetime
 from pathlib import Path
-import os
 import time
 
 import streamlit as st
 
+from osint.config import Settings
+from osint.results import SourceResult
 from osint import domain_analyzer, email_analyzer, report_generator, username_analyzer
 from osint.input_validation import validate_target
 from osint.result_status import source_status
@@ -66,6 +67,8 @@ def _create_pdf(kind: str, target: str, result: dict) -> str:
 
 def _render_source_details(source: str, value) -> None:
     status = source_status(value)
+    if isinstance(value, SourceResult):
+        value = value.to_legacy()
     has_problem = status in {"Error", "Parcial", "Falta configuración", "Herramienta no instalada"}
     with st.expander(f"{'⚠️ ' if has_problem else ''}{source} · {status}", expanded=has_problem):
         if isinstance(value, (list, tuple)) and all(isinstance(item, str) for item in value):
@@ -135,6 +138,7 @@ def render_analysis_tab() -> None:
                             normalized_target,
                             selected_sources=selected_sources,
                             progress_callback=on_source_done,
+                            structured=True,
                         )
                         progress.update(label="Análisis finalizado", state="complete")
                     st.session_state["analysis_result"] = {
@@ -244,22 +248,11 @@ def render_configuration_tab() -> None:
         "Las claves se leen desde el entorno o desde un archivo .env local. "
         "Esta pantalla solo muestra si cada clave está presente; no revela ni edita secretos."
     )
-    api_keys = {
-        "HIBP_API_KEY": "Have I Been Pwned",
-        "BREACHDIRECTORY_API_KEY": "BreachDirectory",
-        "INTELX_KEY": "Intelligence X",
-        "SHODAN_API_KEY": "Shodan",
-        "VT_API_KEY": "VirusTotal",
-        "HUNTER_API_KEY": "Hunter.io",
-    }
-    key_rows = [
-        {
-            "Servicio": service,
-            "Estado": "Configurada" if os.getenv(key) else "No configurada",
-        }
-        for key, service in api_keys.items()
-    ]
-    st.dataframe(key_rows, hide_index=True, use_container_width=True)
+    st.dataframe(
+        Settings.from_environment().api_key_status(),
+        hide_index=True,
+        use_container_width=True,
+    )
     st.caption(
         "Las fuentes que no tengan clave devolverán su propio aviso; las demás "
         "seguirán ejecutándose. Reinicia la app después de cambiar el archivo .env."
