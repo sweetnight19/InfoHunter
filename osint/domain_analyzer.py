@@ -8,6 +8,9 @@ import whois
 import dns.resolver
 from shodan import Shodan
 import sublist3r
+
+from osint.config import get_api_key
+from osint.concurrency import run_sources
 from pyhunter import PyHunter
 
 # ANSI color codes for colored output
@@ -111,7 +114,7 @@ def hunter_domain_search(domain):
     Uses Hunter.io to search for public emails associated with a domain.
     """
     print(f"{CYAN}[INFO] Searching Hunter.io for emails on {domain}...{RESET}")
-    api_key = os.getenv("HUNTER_API_KEY")
+    api_key = get_api_key("HUNTER_API_KEY")
     if not api_key:
         print(f"{RED}[ERROR] HUNTER_API_KEY not set in environment variables.{RESET}")
         return {"error": "HUNTER_API_KEY not set in environment variables."}
@@ -144,13 +147,14 @@ def theharvester_search(domain, sources="all", limit=100):
     """Run theHarvester in a private temporary directory with a hard timeout."""
     try:
         with tempfile.TemporaryDirectory(prefix="infohunter-harvester-") as temp_dir:
-            output_file = os.path.join(temp_dir, "results.json")
+            output_prefix = os.path.join(temp_dir, "results")
+            output_file = output_prefix + ".json"
             cmd = [
                 "theHarvester",
                 "-d", domain,
                 "-b", sources,
                 "-l", str(limit),
-                "-f", output_file,
+                "-f", output_prefix,
             ]
             subprocess.run(
                 cmd,
@@ -208,7 +212,7 @@ def shodan_scan(domain):
     Uses Shodan to scan for exposed services related to the domain.
     """
     print(f"{CYAN}[INFO] Scanning with Shodan for {domain}...{RESET}")
-    api_key = os.getenv("SHODAN_API_KEY")
+    api_key = get_api_key("SHODAN_API_KEY")
     if not api_key:
         print(f"{YELLOW}[WARN] SHODAN_API_KEY not set in environment variables.{RESET}")
         return {"error": "SHODAN_API_KEY not set in environment variables."}
@@ -234,7 +238,7 @@ def vt_domain_report(domain):
     Uses VirusTotal to get domain reputation and relations.
     """
     print(f"{CYAN}[INFO] Querying VirusTotal for {domain}...{RESET}")
-    api_key = os.getenv("VT_API_KEY")
+    api_key = get_api_key("VT_API_KEY")
     if not api_key:
         print(f"{YELLOW}[WARN] VT_API_KEY not set in environment variables.{RESET}")
         return {"error": "VT_API_KEY not set in environment variables."}
@@ -273,21 +277,24 @@ def get_wayback_snapshots(domain):
 
 
 # --- Main analysis function ---
-def analyze(domain):
-    """
-    Performs a full OSINT analysis on the domain and returns a results dictionary.
+def analyze(domain, selected_sources=None, progress_callback=None, structured=False):
+    """Analyze selected sources for this domain.
+
+    Set structured=True to receive SourceResult objects. The default preserves
+    the legacy payload shape used by the CLI and report generators.
     """
     print(f"{MAGENTA}{BOLD}=== Starting OSINT Domain Analysis for {domain} ==={RESET}")
-    results = {}
-    results["whois"] = get_whois(domain)
-    results["dns"] = get_dns(domain)
-    results["subdomains_sublist3r"] = get_subdomains_sublist3r(domain)
-    results["subdomains_crtsh"] = get_crtsh_subdomains(domain)
-    results["hunter"] = hunter_domain_search(domain)
-    results["theharvester"] = theharvester_search(domain)
-    results["wayback"] = get_wayback_snapshots(domain)
-    results["shodan"] = shodan_scan(domain)
-    results["virustotal"] = vt_domain_report(domain)
+    results = run_sources({
+        "whois": lambda: get_whois(domain),
+        "dns": lambda: get_dns(domain),
+        "subdomains_sublist3r": lambda: get_subdomains_sublist3r(domain),
+        "subdomains_crtsh": lambda: get_crtsh_subdomains(domain),
+        "hunter": lambda: hunter_domain_search(domain),
+        "theharvester": lambda: theharvester_search(domain),
+        "wayback": lambda: get_wayback_snapshots(domain),
+        "shodan": lambda: shodan_scan(domain),
+        "virustotal": lambda: vt_domain_report(domain),
+    }, max_workers=4, selected_sources=selected_sources, on_source_done=progress_callback, structured=structured)
     print(f"{MAGENTA}{BOLD}=== Domain Analysis Complete ==={RESET}")
 
     # Clean up any temporary files created by theHarvester

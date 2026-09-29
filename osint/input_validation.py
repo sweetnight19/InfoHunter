@@ -29,8 +29,18 @@ def validate_target(kind, value):
     if not target:
         raise ValueError("Introduce un valor para analizar.")
     if kind == "Usuario":
-        if len(target) > 100 or any(char.isspace() or not char.isprintable() for char in target):
-            raise ValueError("El usuario debe tener hasta 100 caracteres imprimibles, sin espacios.")
+        invalid = (
+            len(target) > 100
+            or target.startswith("-")
+            or "/" in target
+            or "\\" in target
+            or any(char.isspace() or not char.isprintable() for char in target)
+        )
+        if invalid:
+            raise ValueError(
+                "El usuario debe tener hasta 100 caracteres imprimibles, "
+                "sin espacios ni separadores de ruta."
+            )
         return target
     if kind == "Email":
         if len(target) > 254 or target.count("@") != 1:
