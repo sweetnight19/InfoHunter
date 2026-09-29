@@ -9,6 +9,7 @@ import dns.resolver
 from shodan import Shodan
 import sublist3r
 
+from osint.config import get_api_key
 from osint.concurrency import run_sources
 from pyhunter import PyHunter
 
@@ -113,7 +114,7 @@ def hunter_domain_search(domain):
     Uses Hunter.io to search for public emails associated with a domain.
     """
     print(f"{CYAN}[INFO] Searching Hunter.io for emails on {domain}...{RESET}")
-    api_key = os.getenv("HUNTER_API_KEY")
+    api_key = get_api_key("HUNTER_API_KEY")
     if not api_key:
         print(f"{RED}[ERROR] HUNTER_API_KEY not set in environment variables.{RESET}")
         return {"error": "HUNTER_API_KEY not set in environment variables."}
@@ -211,7 +212,7 @@ def shodan_scan(domain):
     Uses Shodan to scan for exposed services related to the domain.
     """
     print(f"{CYAN}[INFO] Scanning with Shodan for {domain}...{RESET}")
-    api_key = os.getenv("SHODAN_API_KEY")
+    api_key = get_api_key("SHODAN_API_KEY")
     if not api_key:
         print(f"{YELLOW}[WARN] SHODAN_API_KEY not set in environment variables.{RESET}")
         return {"error": "SHODAN_API_KEY not set in environment variables."}
@@ -237,7 +238,7 @@ def vt_domain_report(domain):
     Uses VirusTotal to get domain reputation and relations.
     """
     print(f"{CYAN}[INFO] Querying VirusTotal for {domain}...{RESET}")
-    api_key = os.getenv("VT_API_KEY")
+    api_key = get_api_key("VT_API_KEY")
     if not api_key:
         print(f"{YELLOW}[WARN] VT_API_KEY not set in environment variables.{RESET}")
         return {"error": "VT_API_KEY not set in environment variables."}
@@ -276,7 +277,7 @@ def get_wayback_snapshots(domain):
 
 
 # --- Main analysis function ---
-def analyze(domain, selected_sources=None, progress_callback=None):
+def analyze(domain, selected_sources=None, progress_callback=None, structured=False):
     """
     Performs a full OSINT analysis on the domain and returns a results dictionary.
     """
@@ -291,7 +292,7 @@ def analyze(domain, selected_sources=None, progress_callback=None):
         "wayback": lambda: get_wayback_snapshots(domain),
         "shodan": lambda: shodan_scan(domain),
         "virustotal": lambda: vt_domain_report(domain),
-    }, max_workers=4, selected_sources=selected_sources, on_source_done=progress_callback)
+    }, max_workers=4, selected_sources=selected_sources, on_source_done=progress_callback, structured=structured)
     print(f"{MAGENTA}{BOLD}=== Domain Analysis Complete ==={RESET}")
 
     # Clean up any temporary files created by theHarvester
