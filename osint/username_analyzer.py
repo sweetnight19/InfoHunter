@@ -3,7 +3,6 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from osint.config import get_api_key
 from osint.concurrency import run_sources
 
 
