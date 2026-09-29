@@ -1,3 +1,5 @@
+from osint.concurrency import run_sources
+
 import csv
 import glob
 import os
@@ -274,18 +276,15 @@ def analyze(email):
     Returns a dictionary with all results.
     """
     print(f"\n{BOLD}{MAGENTA}[START] OSINT email analysis for: {email}{RESET}")
-    hibp_result = analyze_hibp(email)
-    breachdirectory_result = analyze_breachdirectory(email)
-    holehe_result = analyze_holehe(email)
-    intelx_result = analyze_intelx(email)
+    results = run_sources({
+        "hibp": lambda: analyze_hibp(email),
+        "breachdirectory": lambda: analyze_breachdirectory(email),
+        "holehe": lambda: analyze_holehe(email),
+        "intelx": lambda: analyze_intelx(email),
+    }, max_workers=4)
     print(f"{BOLD}{MAGENTA}[END] Email analysis finished for: {email}{RESET}\n")
-    return {
-        "email": email,
-        "hibp": hibp_result,
-        "breachdirectory": breachdirectory_result,
-        "holehe": holehe_result,
-        "intelx": intelx_result,
-    }
+    results["email"] = email
+    return results
 
 
 # ---------- Console Report ----------
