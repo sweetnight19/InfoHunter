@@ -32,6 +32,7 @@ st.markdown(
 
 st.title("🕵️ InfoHunter")
 st.caption("Análisis OSINT local para dominios, emails y nombres de usuario.")
+st.info("Esta interfaz no incluye autenticación: mantenla en localhost y no la expongas a Internet o a redes compartidas.")
 tab_analysis, tab_config, tab_reports = st.tabs(
     ["🔎 Análisis", "🔐 Configuración", "📄 Informes"]
 )
