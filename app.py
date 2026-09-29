@@ -1,5 +1,8 @@
 from pathlib import Path
+from datetime import datetime
 import os
+import shutil
+import time
 
 import streamlit as st
 from dotenv import find_dotenv, load_dotenv
@@ -101,12 +104,16 @@ with tab_analysis:
             st.session_state.pop("generated_pdf", None)
         else:
             try:
+                started_at = datetime.now().astimezone()
+                started_clock = time.perf_counter()
                 with st.spinner("Consultando las fuentes configuradas…"):
                     result = ANALYZERS[kind](normalized_target)
                 st.session_state["analysis_result"] = {
                     "kind": kind,
                     "target": normalized_target,
                     "result": result,
+                    "started_at": started_at.isoformat(timespec="seconds"),
+                    "duration_seconds": round(time.perf_counter() - started_clock, 1),
                 }
                 st.session_state.pop("generated_pdf", None)
             except Exception as error:
@@ -136,6 +143,11 @@ with tab_analysis:
             for source, value in result.items()
             if source not in {"email", "username", "domain"}
         ]
+        metric_duration, metric_sources = st.columns(2)
+        metric_duration.metric("Duración", f'{saved.get("duration_seconds", 0):.1f} s')
+        metric_sources.metric("Fuentes consultadas", len(rows))
+        if saved.get("started_at"):
+            st.caption(f'Inicio: {saved["started_at"]}')
         st.dataframe(rows, hide_index=True, use_container_width=True)
         for source, value in result.items():
             if source not in {"email", "username", "domain"}:
@@ -198,6 +210,34 @@ with tab_config:
     st.caption(
         "Las fuentes que no tengan clave devolverán su propio aviso; las demás "
         "seguirán ejecutándose. Reinicia la app después de cambiar el archivo .env."
+    )
+    st.markdown("#### Herramientas opcionales")
+    tool_commands = {
+        "Sherlock": "sherlock",
+        "Maigret": "maigret",
+        "Holehe": "holehe",
+        "theHarvester": "theHarvester",
+    }
+    for tool_name, command in tool_commands.items():
+        installed = shutil.which(command) is not None
+        st.write(
+            f"{'✅' if installed else '○'} **{tool_name}** — "
+            f"{'disponible en PATH' if installed else 'no encontrado en PATH'}"
+        )
+
+    harvester_key_files = [
+        Path.home() / ".theHarvester" / "api-keys.yaml",
+        Path("/etc/theHarvester/api-keys.yaml"),
+        Path("/usr/local/etc/theHarvester/api-keys.yaml"),
+    ]
+    key_file = next((path for path in harvester_key_files if path.is_file()), None)
+    if key_file:
+        st.write("✅ **theHarvester API keys** — archivo de configuración encontrado")
+    else:
+        st.write("○ **theHarvester API keys** — archivo api-keys.yaml no encontrado")
+    st.caption(
+        "Solo se comprueba si existe el archivo; InfoHunter no lee ni muestra su contenido. "
+        "Las claves de theHarvester no se obtienen del .env de InfoHunter."
     )
 
 
