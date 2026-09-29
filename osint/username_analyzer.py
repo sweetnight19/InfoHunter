@@ -3,6 +3,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from osint.config import get_api_key
 from osint.concurrency import run_sources
 
 
@@ -79,7 +80,7 @@ def analyze_with_maigret(username):
         return [f"Error running Maigret: could not read CSV output ({type(error).__name__})."]
 
 
-def analyze(username, selected_sources=None, progress_callback=None):
+def analyze(username, selected_sources=None, progress_callback=None, structured=False):
     """Combine selected Sherlock and Maigret results for the username."""
     print(f"\n🚀 Starting OSINT username analysis for: {username}")
     results = run_sources(
@@ -90,6 +91,7 @@ def analyze(username, selected_sources=None, progress_callback=None):
         max_workers=2,
         selected_sources=selected_sources,
         on_source_done=progress_callback,
+        structured=structured,
     )
     print(f"🏁 Analysis finished for: {username}\n")
     results["username"] = username
